@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="kn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ರೈಟ್ ರೈಟ್ · Right Right</title>
+<meta name="description" content="90s Kannada bus songs. Board the Mysuru–Bengaluru bus and watch the songs on the bus TV.">
+<meta property="og:title" content="ರೈಟ್ ರೈಟ್ · Right Right">
+<meta property="og:description" content="90s Kannada bus songs, from when we were kids.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@500;700;800&family=Noto+Sans+Kannada:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column. A "stage" holds two scenes — outside at a dusk bus stop (the bus drives in and leaves),
+   then inside the moving bus, looking at the TV above the windshield. Controls, route strip and tickets sit below. */
+:root{
+  --night:#0f1a1c;
+  --cabin:#17272a;
+  --cabin-edge:#24393d;
+  --ksrtc:#c23a2b;          /* red bus */
+  --led:#ffb23e;            /* amber destination LED */
+  --fg:#efe7da;
+  --muted:#93a8a4;
+  --ink:#2b2420;
+  --pink:#f4cdd0; --green:#d3e8c6; --yellow:#f3e2a2; --blue:#cfe0ef; --lilac:#e2d4ef;
+  --phosphor:#dff3ff;
+  --display:"Baloo Tamma 2","Noto Sans Kannada",system-ui,sans-serif;
+  --body:"Noto Sans Kannada","Baloo Tamma 2",system-ui,sans-serif;
+  --mono:"Courier Prime","Courier New",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{
+  background:radial-gradient(120% 60% at 50% 0%, #1b3236 0%, transparent 60%), var(--night);
+  color:var(--fg);font:16px/1.6 var(--body);min-height:100vh;
+}
+.wrap{
+  max-width:720px;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:max(18px, env(safe-area-inset-top, 0px)) max(40px, env(safe-area-inset-bottom, 0px));
+  display:flex;flex-direction:column;gap:20px;
+}
+
+/* ---------- Destination board ---------- */
+.board{
+  background:#050505;border-radius:10px;border:3px solid #2a2a2a;
+  padding:8px 14px;display:flex;align-items:center;gap:12px;
+  box-shadow:0 0 0 4px var(--ksrtc), 0 10px 30px rgba(0,0,0,.4);overflow:hidden;
+}
+.board .route{flex:none;font-family:var(--mono);font-weight:700;color:#050505;background:var(--led);border-radius:4px;padding:2px 8px;font-size:15px}
+.marquee{flex:1;min-width:0;overflow:hidden;position:relative}
+.marquee span{
+  display:inline-block;white-space:nowrap;padding-left:100%;
+  font-family:var(--display);font-weight:700;font-size:21px;color:var(--led);
+  text-shadow:0 0 6px rgba(255,178,62,.75), 0 0 16px rgba(255,140,30,.35);
+  animation:scroll 16s linear infinite;
+}
+.marquee::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle, transparent 55%, #050505 60%) 0 0/4px 4px;opacity:.55}
+@keyframes scroll{to{transform:translateX(-100%)}}
+
+/* ---------- Title ---------- */
+.title{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 16px}
+.title h1{margin:0;font-family:var(--display);font-weight:800;line-height:1;font-size:clamp(42px, 12vw, 70px);text-wrap:balance}
+.title h1 small{display:block;font-size:.3em;font-weight:500;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+.title p{margin:0;color:var(--muted);font-size:15px;max-width:32ch}
+.plate{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.08em;background:#f5f1e6;color:#111;border:2px solid #111;border-radius:4px;padding:1px 8px;display:inline-block;margin-top:6px}
+
+/* ---------- Stage ---------- */
+.stage{
+  position:relative;width:100%;height:clamp(470px, 84vh, 1100px);height:clamp(470px, 84svh, 1100px);
+  overflow:hidden;background:#6fa9d8;isolation:isolate;
+  border-block:1px solid var(--cabin-edge);
+}
+.wrap.head{padding-block-end:18px}
+.wrap.body{padding-block-start:20px}
+.snd{
+  position:absolute;top:12px;right:12px;z-index:30;
+  font:600 13px/1 var(--body);color:#1b1206;background:var(--led);border:0;border-radius:999px;
+  padding:8px 12px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);
+}
+.snd.off{background:#2a3a3d;color:var(--fg)}
+.snd:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.caption{
+  position:absolute;left:12px;top:54px;z-index:25;max-width:70%;
+  font:700 15px/1.3 var(--display);color:#fff4e6;background:rgba(10,12,24,.6);
+  padding:8px 12px;border-radius:10px;backdrop-filter:blur(2px);transition:opacity .4s;
+}
+.caption small{display:block;font:400 12px/1.3 var(--body);color:#d9cfc0}
+.caption[data-hide]{opacity:0}
+.caption.waiting{animation:hint 2.4s ease-in-out infinite}
+@keyframes hint{0%,100%{opacity:1}50%{opacity:.55}}
+
+/* ----- Scene 1: outside, dusk bus stop ----- */
+.outside{position:absolute;inset:0;transform-origin:50% 72%;transition:transform .95s cubic-bezier(.5,0,.8,.4), opacity .95s ease-in}
+.outside.away{transform:scale(2.8);opacity:0}
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#6fa9d8 0%,#a9d0ea 40%,#dcebee 62%,#f3e6c4 78%)}
+.sun{position:absolute;top:9%;right:16%;width:46px;height:46px;border-radius:50%;background:#fff6d8;box-shadow:0 0 50px 22px rgba(255,240,190,.55)}
+.cloud{position:absolute;height:22px;border-radius:999px;background:#fff;opacity:.85;filter:blur(1px)}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:44%;height:180%;left:16%;bottom:20%}
+.cloud::after{width:34%;height:140%;left:50%;bottom:24%}
+.c1{top:16%;left:8%;width:90px}
+.c2{top:26%;left:46%;width:70px;opacity:.7}
+.layer{position:absolute;left:0;right:0;background-repeat:repeat-x;background-size:auto 100%}
+.hills{bottom:46%;height:16%}
+.fields{bottom:29%;height:30%}
+.avenue{bottom:29%;height:58%}
+.poles{bottom:29%;height:40%}
+.road{bottom:4%;height:26%}
+.ground{bottom:0;height:5%;z-index:6}
+.world{position:absolute;inset:0;will-change:transform}
+.busstop{position:absolute;bottom:29%;left:54%;width:min(50%,34vh)}
+.milestone{position:absolute;bottom:25%;left:5%;width:min(13%,8vh)}
+.bus{
+  position:absolute;bottom:7.5%;left:50%;width:min(84%,62vh);z-index:5;
+  transform:translateX(-50%);will-change:transform;
+}
+.bus svg{display:block;width:100%;height:auto;overflow:visible}
+.bus.waiting{visibility:hidden}
+.bus.stopbounce svg{animation:stopbounce .6s ease-out}
+.bus.lurch svg{animation:lurch .7s ease-out}
+.bus.moving svg{animation:rumble .32s ease-in-out infinite}
+@keyframes stopbounce{0%{transform:rotate(0)}30%{transform:rotate(.9deg) translateY(2px)}65%{transform:rotate(-.4deg)}100%{transform:none}}
+@keyframes lurch{0%{transform:none}35%{transform:rotate(-1.1deg)}100%{transform:none}}
+@keyframes rumble{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
+
+/* ----- Scene 2: inside the moving bus ----- */
+.inside{
+  position:absolute;inset:0;opacity:0;transform:scale(1.14);pointer-events:none;
+  transition:opacity .9s ease-out .25s, transform 1.1s cubic-bezier(.2,.7,.2,1) .25s;
+  background:linear-gradient(180deg,#14292a 0%,#2a504e 30%,#244645 70%,#163130 100%);
+}
+.inside.here{opacity:1;transform:none;pointer-events:auto}
+.cab{position:absolute;inset:-6px;will-change:transform}
+.ceiling{position:absolute;left:0;right:0;top:0;height:7%;background:linear-gradient(180deg,#071111,#10201f);box-shadow:0 2px 0 #2c4a48}
+.ceiling::after{content:"";position:absolute;left:4%;right:4%;bottom:-9px;height:4px;border-radius:2px;background:#9aa7a4;opacity:.7}
+.windshield{
+  position:absolute;left:4%;right:4%;top:20%;height:55%;border-radius:14px 14px 6px 6px;overflow:hidden;
+  border:7px solid #091312;box-shadow:inset 0 0 30px rgba(0,0,0,.35);background:#9cc8e6;
+}
+.windshield canvas{display:block;width:100%;height:100%}
+.windshield::after{ /* centre pillar + wiper */
+  content:"";position:absolute;left:50%;top:0;bottom:0;width:7px;margin-left:-3px;background:#091312;
+}
+.sweep{
+  position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .25s linear;
+  background:radial-gradient(130% 100% at 50% 35%, rgba(8,22,8,.15), rgba(8,22,8,.55));
+}
+.dash{
+  position:absolute;left:0;right:0;top:73%;height:9%;
+  background:linear-gradient(180deg,#2c2a26,#1c1a17);box-shadow:inset 0 2px 0 #4a453d;
+  display:flex;align-items:center;padding-left:5%;
+}
+.shubha{
+  background:var(--ksrtc);color:#fff4e6;font-family:var(--display);font-weight:700;font-size:clamp(15px,2.2vh,22px);line-height:1;
+  padding:6px 12px 4px;border-radius:999px;white-space:nowrap;
+}
+.steer{position:absolute;right:9%;bottom:30%;width:min(26%,24vh)}
+.bunting{position:absolute;left:0;right:0;top:7%;height:14px;display:flex;justify-content:space-between;z-index:2}
+.bunting i{width:7.14%;height:14px;clip-path:polygon(0 0,100% 0,50% 100%)}
+.bunting i:nth-child(5n+1){background:var(--ksrtc)}
+.bunting i:nth-child(5n+2){background:var(--yellow)}
+.bunting i:nth-child(5n+3){background:var(--green)}
+.bunting i:nth-child(5n+4){background:var(--blue)}
+.bunting i:nth-child(5n+5){background:var(--pink)}
+.seats{position:absolute;left:3%;right:3%;bottom:-2%;height:19%;display:flex;justify-content:space-between;z-index:4}
+.seat{
+  position:relative;width:43%;border-radius:22px 22px 0 0;
+  background:repeating-linear-gradient(90deg,#284770 0 8px,#2c4d79 8px 16px);
+  box-shadow:inset 0 3px 0 #4a6b98, 0 -6px 20px rgba(0,0,0,.4);
+}
+.seat .cover{
+  position:absolute;left:12%;right:12%;top:8%;height:46%;border-radius:8px 8px 4px 4px;
+  background:#f1ece2;box-shadow:inset 0 -3px 0 #d8d0c0;
+  display:grid;place-items:center;font:700 11px/1 var(--display);color:#9a2e22;letter-spacing:.04em;
+}
+.seat .cover::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;
+  background:radial-gradient(circle at 4px 0, #f1ece2 3px, transparent 3.5px) 0 0/8px 6px repeat-x}
+.tvmount{
+  position:absolute;top:8.5%;left:50%;transform:translateX(-50%);width:min(88%,66vh);z-index:3;
+}
+@media (max-width:600px){            /* phones: lower the dashboard so more road shows under the TV */
+  .windshield{height:62%}
+  .dash{top:80%;height:8%}
+  .seats{height:14%}
+  .tvmount{width:max(84%, 236px)}
+}
+.tvmount::before,.tvmount::after{content:"";position:absolute;top:-24px;width:5px;height:26px;background:#444;border-radius:2px}
+.tvmount::before{left:22%}
+.tvmount::after{right:22%}
+
+/* ---------- The CRT TV ---------- */
+.tv{
+  background:linear-gradient(180deg,#2a2622,#191714);border-radius:16px;padding:10px 10px 6px;
+  border:2px solid #3a342c;box-shadow:inset 0 1px 0 #4a4238, 0 14px 30px rgba(0,0,0,.55);
+}
+.screen{
+  position:relative;width:100%;min-width:200px;aspect-ratio:4/3;min-height:205px;
+  border-radius:22px / 18px;overflow:hidden;background:#050806;box-shadow:inset 0 0 0 6px #0c0c0c;
+}
+@media (min-width:600px){ .screen{aspect-ratio:16/10} }
+.player{position:absolute;inset:0;width:100%;height:100%;border:0;visibility:hidden}
+.screen.live .player{visibility:visible}
+.glass{
+  position:absolute;inset:0;
+  background:radial-gradient(60% 45% at 30% 22%, rgba(255,255,255,.10), transparent 70%),
+             radial-gradient(120% 100% at 50% 50%, #1d2623 0%, #0b100e 70%, #050706 100%);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.8);transition:opacity .2s;
+}
+.screen.live .glass{opacity:0;pointer-events:none}
+.noise{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;opacity:0;pointer-events:none}
+.screen.static .noise{opacity:1}
+.flash{
+  position:absolute;inset:0;margin:auto;pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side, #fff, var(--phosphor) 60%, rgba(160,210,255,.6));
+  box-shadow:0 0 30px 8px rgba(190,230,255,.7);
+}
+.screen.warming .flash{animation:crtOn .75s cubic-bezier(.2,.8,.2,1) forwards}
+.screen.cooling .flash{animation:crtOff .55s ease-in forwards}
+@keyframes crtOn{0%{opacity:1;transform:scale(0,.006)}30%{opacity:1;transform:scale(1,.006)}62%{opacity:.95;transform:scale(1,1)}100%{opacity:0;transform:scale(1,1)}}
+@keyframes crtOff{0%{opacity:.95;transform:scale(1,1)}40%{opacity:1;transform:scale(1,.006)}75%{opacity:1;transform:scale(.02,.006)}100%{opacity:0;transform:scale(0,0)}}
+.offline{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:14px 18px;background:#0b0b0b;color:#cfc6b8;font-size:13px;line-height:1.5;text-align:center}
+.offline b{font-family:var(--display);font-size:16px;color:var(--led)}
+.tvfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 4px 0;font-family:var(--mono);font-size:11px;color:#8b8478}
+.tvfoot .brand{letter-spacing:.14em}
+.lamp{width:8px;height:8px;border-radius:50%;background:#4a1712;display:inline-block;margin-right:6px;vertical-align:middle}
+.inside.on .lamp{background:#ff4d3a;box-shadow:0 0 8px #ff4d3a}
+.knobs{display:flex;align-items:center;gap:8px}
+.knob{all:unset;cursor:pointer;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #6a6258, #2b2721 70%);border:2px solid #111;box-shadow:0 2px 0 #000;display:grid;place-items:center;color:#d9d0c2;font-size:11px}
+.knob:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+.knob.dial{cursor:default;background:repeating-conic-gradient(#3b352d 0 10deg, #2b2721 10deg 20deg)}
+
+/* ---------- Now playing + controls ---------- */
+.now{display:flex;flex-direction:column;gap:2px;text-align:center}
+.now .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.now .song{font-family:var(--display);font-weight:700;font-size:clamp(22px,6vw,28px);line-height:1.2;text-wrap:balance}
+.now .meta{color:var(--muted);font-size:14px}
+.controls{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.btn{font:inherit;color:var(--fg);background:var(--cabin);border:1px solid var(--cabin-edge);border-radius:12px;padding:10px 12px;cursor:pointer;line-height:1.2;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.btn b{font-family:var(--display);font-size:17px;font-weight:700}
+.btn small{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.btn:hover{border-color:var(--led)}
+.btn:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+.bell{width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffd27a, var(--led) 45%, #c97b12 100%);color:#2a1500;border:4px solid #3a2a12;box-shadow:0 8px 0 #6e4610, 0 14px 24px rgba(0,0,0,.45);justify-content:center}
+.bell small{color:#4a2c05}
+.bell b{font-size:22px}
+.bell:active{transform:translateY(5px);box-shadow:0 3px 0 #6e4610, 0 6px 12px rgba(0,0,0,.4)}
+.bell:hover{border-color:#3a2a12}
+.bell.pause{background:radial-gradient(circle at 35% 30%, #ff9a85, var(--ksrtc) 50%, #8a2216 100%);color:#fff4e6}
+.bell.pause small{color:#ffe0d6}
+.note{min-height:1.4em;text-align:center;font-size:13px;color:var(--led);margin:-8px 0 0}
+
+/* ---------- Route strip ---------- */
+.route-strip{position:relative;padding:34px 6px 46px}
+.roadline{position:relative;height:6px;border-radius:3px;background:#2b3c3f}
+.roadline .done{position:absolute;inset:0 auto 0 0;width:0;border-radius:3px;background:var(--led);transition:width .8s linear}
+.stops{display:flex;justify-content:space-between;margin-top:-11px;position:relative}
+.stop{position:relative;width:16px;height:16px;flex:none}
+.stop i{display:block;width:16px;height:16px;border-radius:50%;background:var(--night);border:3px solid #2b3c3f}
+.stop.passed i{border-color:var(--led);background:var(--led)}
+.stop span{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:12px;white-space:nowrap;color:var(--muted)}
+.stop:nth-child(even) span{top:38px}
+.stop:first-child span{left:0;transform:none}
+.stop:last-child span{left:auto;right:0;transform:none}
+.minibus{position:absolute;top:2px;left:14px;transform:translateX(-50%);transition:left .8s linear;width:44px;height:26px}
+@media (max-width:460px){ .stop span{font-size:11px} }
+
+/* ---------- Tickets ---------- */
+.tickets-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.tickets-head h2{margin:0;font-family:var(--display);font-size:22px}
+.tickets-head span{font-size:13px;color:var(--muted)}
+.tickets{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.ticket{
+  all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;
+  gap:4px 14px;align-items:center;width:100%;color:var(--ink);padding:12px 16px 12px 22px;border-radius:6px;position:relative;
+  font-family:var(--mono);
+  -webkit-mask:radial-gradient(circle 5px at 0 10px, transparent 98%, #000) 0 0/100% 20px repeat-y;
+          mask:radial-gradient(circle 5px at 0 10px, transparent 98%, #000) 0 0/100% 20px repeat-y;
+  transition:transform .15s ease;
+}
+.ticket:hover{transform:translateX(4px)}
+.ticket:focus-visible{outline:3px solid var(--led);outline-offset:3px}
+.t-no{font-size:12px;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.1em;opacity:.7}
+.t-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.t-leg{font-size:12px;letter-spacing:.04em;opacity:.8}
+.t-song{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.25}
+.t-film{font-size:13px}
+.t-fare{text-align:right;font-size:13px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.t-fare b{font-size:18px}
+.punch{width:18px;height:18px;border-radius:50%;background:var(--night);opacity:0;box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.ticket.active{transform:translateX(8px)}
+.ticket.active .punch{opacity:1}
+.stamp{font-family:var(--display);font-weight:800;font-size:13px;color:var(--ksrtc);border:2px solid var(--ksrtc);border-radius:4px;padding:0 6px;transform:rotate(-8deg);opacity:0}
+.ticket.active .stamp{opacity:1}
+
+footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
+
+@media (prefers-reduced-motion:reduce){
+  .marquee span{animation:none;padding-left:0}
+  .caption.waiting{animation:none}
+  .bus.moving svg,.bus.lurch svg,.bus.stopbounce svg{animation:none}
+  .outside,.inside{transition-duration:.2s}
+  .screen.warming .flash,.screen.cooling .flash{animation-duration:.01s}
+  .roadline .done,.minibus{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap head">
+
+  <div class="board" aria-label="Destination board: Mysuru to Bengaluru">
+    <span class="route">1</span>
+    <div class="marquee"><span>ಮೈಸೂರು ➜ ಮಂಡ್ಯ ➜ ಮದ್ದೂರು ➜ ಚನ್ನಪಟ್ಟಣ ➜ ರಾಮನಗರ ➜ ಬೆಂಗಳೂರು &nbsp;·&nbsp; MYSURU ➜ BENGALURU &nbsp;·&nbsp; ಶುಭ ಪ್ರಯಾಣ</span></div>
+  </div>
+
+  <header class="title">
+    <h1>ರೈಟ್ ರೈಟ್<small>Right Right · 90s Kannada bus songs</small></h1>
+    <div>
+      <p>ಚಿಕ್ಕವರಿದ್ದಾಗ ಬಸ್ ಟಿವಿಯಲ್ಲಿ ಕೇಳಿದ ಹಾಡುಗಳು. Songs from the bus TV, when we were kids.</p>
+      <span class="plate">KA 09 F 1990</span>
+    </div>
+  </header>
+
+</div>
+
+<section class="stage" id="stage" aria-label="Bus scene">
+    <button class="snd" id="snd" type="button" hidden>🔊 ಬಸ್ ಸೌಂಡ್ · Bus sound</button>
+    <div class="caption waiting" id="caption">ಬಸ್‌ಗಾಗಿ ಕಾಯೋಣ… ಎಲ್ಲಾದರೂ ಟ್ಯಾಪ್ ಮಾಡಿ<small>Tap anywhere to call the bus</small></div>
+
+    <!-- Scene 1: outside -->
+    <div class="outside" id="outside" aria-hidden="true">
+      <div class="sky"><span class="sun"></span><span class="cloud c1"></span><span class="cloud c2"></span></div>
+      <div class="layer hills" data-f="0.04"></div>
+      <div class="layer fields" data-f="0.18"></div>
+      <div class="layer avenue" data-f="0.6"></div>
+      <div class="layer poles" data-f="0.6"></div>
+      <div class="world" id="world">
+        <svg class="busstop" viewBox="0 0 260 160">
+          <!-- village bus shelter -->
+          <rect x="4" y="30" width="138" height="10" fill="#d8d1c2"/>
+          <rect x="2" y="26" width="142" height="6" fill="#ebe5d8"/>
+          <rect x="14" y="40" width="9" height="120" fill="#ece6da"/><rect x="14" y="140" width="9" height="20" fill="#b8402c"/>
+          <rect x="123" y="40" width="9" height="120" fill="#ece6da"/><rect x="123" y="140" width="9" height="20" fill="#b8402c"/>
+          <rect x="23" y="44" width="100" height="66" fill="#f2ede2"/>
+          <text x="73" y="66" text-anchor="middle" font-family="Baloo Tamma 2, Noto Sans Kannada, sans-serif" font-weight="800" font-size="15" fill="#2c5aa0">ಬಸ್ ತಂಗುದಾಣ</text>
+          <text x="73" y="84" text-anchor="middle" font-family="Baloo Tamma 2, Noto Sans Kannada, sans-serif" font-weight="700" font-size="10" fill="#7a3b22">ಹೊಸಹಳ್ಳಿ ಗ್ರಾಮ ಪಂಚಾಯಿತಿ</text>
+          <rect x="30" y="122" width="86" height="7" fill="#9a8a72"/>
+          <rect x="34" y="129" width="5" height="31" fill="#7d6f5c"/><rect x="107" y="129" width="5" height="31" fill="#7d6f5c"/>
+          <!-- petty tea shop -->
+          <path d="M150 64 L254 64 L246 44 L158 44 Z" fill="#b9552f"/>
+          <path d="M158 44 L246 44" stroke="#8c3c20" stroke-width="2"/>
+          <rect x="156" y="64" width="92" height="96" fill="#d9c7a2"/>
+          <rect x="164" y="72" width="76" height="40" fill="#3b2c22"/>
+          <rect x="164" y="112" width="76" height="8" fill="#8a6a45"/>
+          <rect x="160" y="50" width="34" height="12" rx="2" fill="#f1c232"/>
+          <text x="177" y="60" text-anchor="middle" font-family="Baloo Tamma 2, Noto Sans Kannada, sans-serif" font-weight="800" font-size="10" fill="#7a1f12">ಟೀ</text>
+          <g fill="#e7c13a"><ellipse cx="216" cy="80" rx="4" ry="9" transform="rotate(-20 216 80)"/><ellipse cx="222" cy="81" rx="4" ry="9"/><ellipse cx="228" cy="80" rx="4" ry="9" transform="rotate(20 228 80)"/></g>
+          <path d="M222 66 V72" stroke="#5a4632" stroke-width="2"/>
+          <g><rect x="172" y="74" width="7" height="12" fill="#e2463b"/><rect x="181" y="74" width="7" height="12" fill="#3b8fd1"/><rect x="190" y="74" width="7" height="12" fill="#f19a2e"/></g>
+          <rect x="168" y="96" width="12" height="16" rx="2" fill="#c0c7cc"/>
+          <rect x="198" y="100" width="20" height="12" rx="2" fill="#9cc0cf" opacity=".8"/>
+        </svg>
+        <svg class="milestone" viewBox="0 0 60 80">
+          <path d="M6 80 V30 Q6 4 30 4 Q54 4 54 30 V80 Z" fill="#f2efe6"/>
+          <path d="M6 30 Q6 4 30 4 Q54 4 54 30 Z" fill="#f1c232"/>
+          <text x="30" y="46" text-anchor="middle" font-family="Baloo Tamma 2, Noto Sans Kannada, sans-serif" font-weight="700" font-size="9" fill="#222">ಬೆಂಗಳೂರು</text>
+          <text x="30" y="64" text-anchor="middle" font-family="Courier Prime, monospace" font-weight="700" font-size="15" fill="#222">140</text>
+          <text x="30" y="75" text-anchor="middle" font-family="Noto Sans Kannada, sans-serif" font-size="7" fill="#444">ಕಿ.ಮೀ</text>
+        </svg>
+      </div>
+      <div class="layer road" data-f="1"></div>
+      <div class="bus waiting" id="bus">
+        <svg viewBox="0 0 320 132">
+          <ellipse cx="160" cy="126" rx="152" ry="6" fill="rgba(0,0,0,.35)"/>
+          <rect x="8" y="10" width="290" height="8" rx="4" fill="#e9dcc0"/>
+          <path d="M14 14 H288 Q308 16 313 40 L315 100 Q315 108 306 108 H14 Q8 108 8 100 V22 Q8 14 14 14 Z" fill="#c23a2b"/>
+          <rect x="16" y="26" width="236" height="35" rx="4" fill="#1d2a33"/>
+          <g fill="#8fb3c4">
+            <rect x="20" y="29" width="34" height="29" rx="2"/><rect x="58" y="29" width="34" height="29" rx="2"/>
+            <rect x="96" y="29" width="34" height="29" rx="2"/><rect x="134" y="29" width="34" height="29" rx="2"/>
+            <rect x="172" y="29" width="34" height="29" rx="2"/><rect x="210" y="29" width="38" height="29" rx="2"/>
+          </g>
+          <g fill="#22303a">
+            <circle cx="38" cy="50" r="7"/><rect x="30" y="54" width="16" height="6" rx="3"/>
+            <circle cx="114" cy="49" r="7"/><rect x="106" y="53" width="16" height="7" rx="3"/>
+            <circle cx="150" cy="51" r="6"/>
+            <circle cx="228" cy="50" r="7"/><rect x="220" y="54" width="16" height="6" rx="3"/>
+          </g>
+          <path d="M262 26 H300 Q309 28 311 44 V62 H262 Z" fill="#9cc0cf"/>
+          <rect x="256" y="15" width="52" height="10" rx="2" fill="#0b0b0b"/>
+          <text x="282" y="23.5" text-anchor="middle" font-family="Baloo Tamma 2, Noto Sans Kannada, sans-serif" font-weight="700" font-size="7.5" fill="#ffb23e">ಬೆಂಗಳೂರು</text>
+          <rect x="236" y="64" width="22" height="42" fill="#9e2c20" stroke="#5c1a12" stroke-width="1.5"/>
+          <rect x="240" y="68" width="14" height="14" fill="#8fb3c4"/>
+          <rect x="8" y="66" width="226" height="7" fill="#f3e2a2"/>
+          <text x="26" y="92" font-family="Baloo Tamma 2, Noto Sans Kannada, sans-serif" font-weight="800" font-size="13" fill="#f3e2a2">ರೈಟ್ ರೈಟ್ ಎಕ್ಸ್‌ಪ್ರೆಸ್</text>
+          <rect x="8" y="100" width="307" height="8" fill="#3a1410"/>
+          <circle cx="72" cy="108" r="20" fill="#3a1410"/><circle cx="262" cy="108" r="20" fill="#3a1410"/>
+          <g id="wheelA"><circle cx="72" cy="108" r="16" fill="#141414"/><circle cx="72" cy="108" r="8" fill="#9a9a9a"/>
+            <path d="M72 100 V116 M64 108 H80" stroke="#555" stroke-width="2.5"/></g>
+          <g id="wheelB"><circle cx="262" cy="108" r="16" fill="#141414"/><circle cx="262" cy="108" r="8" fill="#9a9a9a"/>
+            <path d="M262 100 V116 M254 108 H270" stroke="#555" stroke-width="2.5"/></g>
+          <circle cx="311" cy="88" r="4.5" fill="#fff2b0"/>
+          <rect x="8" y="82" width="4" height="10" fill="#ff5a3a"/>
+          <rect x="294" y="98" width="18" height="7" rx="1" fill="#f5f1e6"/>
+        </svg>
+      </div>
+      <div class="layer ground" data-f="1.2"></div>
+    </div>
+
+    <!-- Scene 2: inside the bus -->
+    <div class="inside" id="inside">
+      <div class="cab" id="cab">
+        <div class="windshield"><canvas id="roadview"></canvas></div>
+        <div class="sweep" id="sweep"></div>
+        <div class="ceiling"></div>
+        <div class="bunting" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="dash">
+          <span class="shubha">ಶುಭ ಪ್ರಯಾಣ</span>
+          <svg class="steer" viewBox="0 0 140 80" aria-hidden="true">
+            <path d="M10 80 A60 60 0 0 1 130 80" fill="none" stroke="#111" stroke-width="12"/>
+            <path d="M70 80 V48 M70 52 L28 66 M70 52 L112 66" stroke="#111" stroke-width="8"/>
+            <circle cx="70" cy="56" r="10" fill="#222"/>
+          </svg>
+        </div>
+        <div class="tvmount">
+          <div class="tv">
+            <div class="screen" id="screen">
+              <div class="glass" aria-hidden="true"></div>
+              <canvas class="noise" id="noise" width="160" height="120" aria-hidden="true"></canvas>
+              <div class="flash" aria-hidden="true"></div>
+            </div>
+            <div class="tvfoot">
+              <span><span class="lamp"></span><span id="tvstate">TV OFF</span></span>
+              <span class="brand">VIDEOCON</span>
+              <span class="knobs">
+                <span class="knob dial" aria-hidden="true"></span>
+                <button class="knob" id="power" type="button" aria-label="TV power">⏻</button>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="seats" aria-hidden="true">
+          <div class="seat"><span class="cover">ರೈಟ್ ರೈಟ್</span></div>
+          <div class="seat"><span class="cover">ಶುಭ ಪ್ರಯಾಣ</span></div>
+        </div>
+      </div>
+    </div>
+</section>
+
+<div class="wrap body">
+  <div class="now" aria-live="polite">
+    <span class="eyebrow" id="nowLeg">ಮೈಸೂರು ➜ ಮಂಡ್ಯ</span>
+    <span class="song" id="nowSong">ದೇವರಿಗೊಂದು ಕಾಗದ ಬರೆದು</span>
+    <span class="meta" id="nowMeta">Bevu Bella · Rajesh Krishnan</span>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="prev" type="button"><b>◀ ಹಿಂದೆ</b><small>Previous</small></button>
+    <button class="btn bell" id="bell" type="button" aria-label="Right right: board the bus"><b>ರೈಟ್ ರೈಟ್</b><small>Board</small></button>
+    <button class="btn" id="next" type="button"><b>ಮುಂದೆ ▶</b><small>Next stop</small></button>
+  </div>
+  <p class="note" id="note"></p>
+
+  <section class="route-strip" aria-label="Route progress">
+    <svg class="minibus" id="minibus" viewBox="0 0 44 26" aria-hidden="true">
+      <rect x="1" y="2" width="42" height="18" rx="4" fill="#c23a2b"/>
+      <rect x="1" y="11" width="42" height="3" fill="#f3e2a2"/>
+      <rect x="5" y="5" width="7" height="5" rx="1" fill="#cfe0ef"/><rect x="14" y="5" width="7" height="5" rx="1" fill="#cfe0ef"/>
+      <rect x="23" y="5" width="7" height="5" rx="1" fill="#cfe0ef"/><rect x="32" y="5" width="8" height="9" rx="1" fill="#cfe0ef"/>
+      <circle cx="10" cy="21" r="4" fill="#111"/><circle cx="34" cy="21" r="4" fill="#111"/>
+      <circle cx="10" cy="21" r="1.6" fill="#888"/><circle cx="34" cy="21" r="1.6" fill="#888"/>
+    </svg>
+    <div class="roadline"><div class="done" id="done"></div></div>
+    <div class="stops" id="stops"></div>
+  </section>
+
+  <section>
+    <div class="tickets-head"><h2>ಟಿಕೆಟ್‌ಗಳು</h2><span>Tap a ticket to play that song</span></div>
+    <ol class="tickets" id="tickets"></ol>
+  </section>
+
+  <footer>
+    ಹಾಡುಗಳು ಯೂಟ್ಯೂಬ್‌ನ ಅಧಿಕೃತ ಅಪ್‌ಲೋಡ್‌ಗಳಿಂದ ಪ್ಲೇ ಆಗುತ್ತವೆ.<br>
+    Songs play from the music labels' official uploads on YouTube. All rights belong to their owners.
+  </footer>
+</div>
+
+<script>
+const SONGS = [
+  { id:"g_RLaY_-um8", kn:"ದೇವರಿಗೊಂದು ಕಾಗದ ಬರೆದು", en:"Devarigondu Kaagada Baredu", film:"Bevu Bella", credit:"Rajesh Krishnan", paper:"--pink",   fare:"3.00" },
+  { id:"6LsTBGvPpaI", kn:"ಆಕಾಶಕ್ಕೆ ಚಪ್ಪರ ಹಾಕಿ",     en:"Aakashakke Chappara Haaki",  film:"Gowramma",   credit:"Hariharan",       paper:"--green",  fare:"5.50" },
+  { id:"rpwBjp_QwPs", kn:"ಬಾನಿಂದ ಜಾರಿದಂತ",          en:"Baaninda Jaaridantha",       film:"Gowramma",   credit:"Udit Narayan",    paper:"--yellow", fare:"7.00" },
+  { id:"9hQuf-yHaDg", kn:"ಅನುರಾಗದ ಅಲೆಗಳ ಮೇಲೆ",      en:"Anuragada Alegala Mele",     film:"Anuragada Alegalu", credit:"Music: Hamsalekha", paper:"--blue", fare:"9.50" },
+  { id:"0dyYI0L8E2o", kn:"ಸಾರಾಯಿ ಸೀಶೆಯಲಿ",          en:"Saarayi Seesheyali",         film:"Mangalya Sakshi", credit:"S. P. Balasubrahmanyam", paper:"--lilac", fare:"12.00" }
+];
+const STOPS = [
+  { kn:"ಮೈಸೂರು", en:"Mysuru" }, { kn:"ಮಂಡ್ಯ", en:"Mandya" }, { kn:"ಮದ್ದೂರು", en:"Maddur" },
+  { kn:"ಚನ್ನಪಟ್ಟಣ", en:"Channapatna" }, { kn:"ರಾಮನಗರ", en:"Ramanagara" }, { kn:"ಬೆಂಗಳೂರು", en:"Bengaluru" }
+];
+
+const $ = id => document.getElementById(id);
+const stage = $("stage"), outside = $("outside"), inside = $("inside"), screen = $("screen"), bellBtn = $("bell");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const hosted = location.protocol.startsWith("http") && location.origin !== "null";
+
+let scene = "outside";      // outside | departing | inside
+let tv = "off";             // off | warming | on | cooling
+let frame = null, loadedId = null, playerReady = false;
+let cur = 0, playing = false, lastState = null, progress = 0;
+let speed = 0, targetSpeed = 0, worldX = 0, zOff = 0;
+
+/* ======================= Scenery tiles (inline SVG) ======================= */
+const svgURL = s => `url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+const palm = (x, h, lean = 0) => {
+  const tx = x + lean, ty = 170 - h;
+  return `<path d='M${x} 170 Q${x + lean * .2} ${170 - h / 2} ${tx} ${ty}' stroke='#6b5135' stroke-width='4' fill='none'/>
+  <g stroke='#3e6d2d' stroke-width='4' fill='none' stroke-linecap='round'>
+  <path d='M${tx} ${ty} q-16 -4 -26 12'/><path d='M${tx} ${ty} q-14 -14 -28 -10'/><path d='M${tx} ${ty} q2 -16 -10 -24'/>
+  <path d='M${tx} ${ty} q14 -12 26 -6'/><path d='M${tx} ${ty} q18 2 24 16'/></g>`;
+};
+const areca = x => `<path d='M${x} 170 V40' stroke='#8a7a5a' stroke-width='2.5'/><g stroke='#4f7f34' stroke-width='3' fill='none' stroke-linecap='round'>
+  <path d='M${x} 40 q-10 -2 -14 8'/><path d='M${x} 40 q10 -2 14 8'/><path d='M${x} 40 q-2 -10 -8 -14'/><path d='M${x} 40 q4 -10 10 -12'/></g>`;
+const TILES = {
+  hills: `<svg xmlns='http://www.w3.org/2000/svg' width='900' height='160' viewBox='0 0 900 160'>
+    <path d='M0 160 V110 Q60 80 120 95 Q170 38 240 70 Q300 96 360 85 Q430 28 500 60 Q560 90 620 80 Q700 44 760 75 Q830 100 900 110 V160Z' fill='#9fb4c0'/>
+    <path d='M0 160 V128 Q90 104 180 120 Q260 94 340 118 Q430 100 520 122 Q610 101 700 120 Q800 108 900 128 V160Z' fill='#86a08f'/></svg>`,
+  fields: `<svg xmlns='http://www.w3.org/2000/svg' width='700' height='190' viewBox='0 0 700 190'>
+    <rect y='150' width='700' height='40' fill='#8db24f'/>
+    <g stroke='#7aa043' stroke-width='2'><path d='M0 160 H700'/><path d='M0 170 H700'/><path d='M0 180 H700'/></g>
+    ${palm(30, 110, -8)}${palm(64, 86, 10)}${palm(290, 120, 6)}${palm(326, 92, -10)}${palm(560, 104, 8)}
+    ${areca(610)}${areca(628)}${areca(646)}
+    <rect x='150' y='126' width='70' height='34' fill='#efe6d6'/><path d='M142 128 L228 128 L214 108 L156 108 Z' fill='#b9552f'/>
+    <rect x='178' y='138' width='12' height='22' fill='#5a3d2b'/><rect x='200' y='136' width='10' height='9' fill='#3b6f8c'/>
+    <path d='M430 160 Q446 118 462 160 Z' fill='#d6a84a'/><path d='M466 160 Q478 128 490 160 Z' fill='#c99a3e'/>
+    <g fill='#4f7f34'><ellipse cx='110' cy='160' rx='34' ry='12'/><ellipse cx='380' cy='162' rx='40' ry='12'/><ellipse cx='520' cy='162' rx='26' ry='10'/></g></svg>`,
+  avenue: `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='320' viewBox='0 0 600 320'>
+    <path d='M150 320 V180 M150 210 Q120 170 92 150 M150 200 Q185 160 215 145' stroke='#5a4632' stroke-width='16' fill='none' stroke-linecap='round'/>
+    <g><ellipse cx='150' cy='120' rx='122' ry='52' fill='#2f5a2a'/><ellipse cx='95' cy='105' rx='60' ry='40' fill='#3d6b31'/>
+      <ellipse cx='200' cy='98' rx='68' ry='42' fill='#3d6b31'/><ellipse cx='150' cy='84' rx='62' ry='36' fill='#4b7a37'/>
+      <ellipse cx='60' cy='130' rx='34' ry='22' fill='#2f5a2a'/><ellipse cx='245' cy='128' rx='30' ry='20' fill='#2f5a2a'/></g>
+    <rect x='142' y='272' width='16' height='26' fill='#f2efe6'/><rect x='142' y='298' width='16' height='8' fill='#b8402c'/>
+    <path d='M450 320 V200' stroke='#4e3d2c' stroke-width='12'/>
+    <g><ellipse cx='450' cy='160' rx='86' ry='56' fill='#335d2b'/><ellipse cx='420' cy='140' rx='46' ry='36' fill='#41702f'/><ellipse cx='482' cy='146' rx='44' ry='34' fill='#3a6a2e'/></g>
+    <rect x='444' y='280' width='12' height='22' fill='#f2efe6'/><rect x='444' y='302' width='12' height='7' fill='#b8402c'/></svg>`,
+  poles: `<svg xmlns='http://www.w3.org/2000/svg' width='740' height='220' viewBox='0 0 740 220'><g fill='none'>
+    <path d='M310 220 V40' stroke='#a3a39d' stroke-width='5'/><path d='M294 48 H326' stroke='#7c7c78' stroke-width='4'/>
+    <path d='M0 56 Q155 78 310 54 Q525 80 740 56' stroke='#3d3d3d' stroke-width='1.2'/></g></svg>`,
+  road: `<svg xmlns='http://www.w3.org/2000/svg' width='220' height='100' viewBox='0 0 220 100'>
+    <rect width='220' height='100' fill='#a3653d'/>
+    <path d='M0 8 Q30 4 60 8 T120 7 T180 9 T220 8 V72 Q190 76 160 72 T100 74 T40 71 T0 72 Z' fill='#4d4c52'/>
+    <ellipse cx='70' cy='40' rx='30' ry='6' fill='#57565c'/><ellipse cx='170' cy='52' rx='22' ry='5' fill='#545359'/>
+    <ellipse cx='120' cy='60' rx='8' ry='3' fill='#3f3e44'/>
+    <g fill='#c9b18f'><circle cx='30' cy='88' r='2'/><circle cx='110' cy='92' r='1.6'/><circle cx='190' cy='86' r='2.2'/></g></svg>`,
+  ground: `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='30' viewBox='0 0 240 30'>
+    <rect width='240' height='30' fill='#94552f'/>
+    <g fill='#5f8a37'><path d='M10 30 l4 -16 l3 16 Z'/><path d='M16 30 l6 -12 l1 12 Z'/><path d='M90 30 l3 -14 l4 14 Z'/>
+    <path d='M150 30 l5 -18 l2 18 Z'/><path d='M157 30 l5 -10 l1 10 Z'/><path d='M210 30 l3 -13 l4 13 Z'/></g>
+    <g fill='#c9b8a0'><circle cx='50' cy='22' r='3'/><circle cx='120' cy='24' r='2'/><circle cx='190' cy='20' r='2.5'/></g></svg>`
+};
+const layers = [...document.querySelectorAll(".outside .layer")];
+layers.forEach(l => { const k = [...l.classList].find(c => TILES[c]); l.style.backgroundImage = svgURL(TILES[k]); });
+
+/* ======================= Build route + tickets ======================= */
+$("stops").innerHTML = STOPS.map(s => `<div class="stop"><i></i><span>${s.kn}</span></div>`).join("");
+$("tickets").innerHTML = SONGS.map((s, i) => `
+  <li><button class="ticket" type="button" data-i="${i}" style="background:var(${s.paper})" aria-label="Play ${s.en}, from the film ${s.film}">
+    <span class="t-no">No. ${String(90401 + i)}</span>
+    <span class="t-main">
+      <span class="t-leg">${STOPS[i].kn} ➜ ${STOPS[i+1].kn} · ${STOPS[i].en} → ${STOPS[i+1].en}</span>
+      <span class="t-song">${s.kn}</span>
+      <span class="t-film">${s.film} · ${s.credit}</span>
+    </span>
+    <span class="t-fare"><span class="punch"></span><b>₹${s.fare}</b><span class="stamp">ಈಗ</span></span>
+  </button></li>`).join("");
+document.querySelectorAll(".ticket").forEach(t => t.addEventListener("click", () => { unlockAudio(); ding(); go(+t.dataset.i, true); }));
+
+/* ======================= Scene 1: the bus arrives ======================= */
+const busEl = $("bus"), wheels = [$("wheelA"), $("wheelB")];
+let busX = 0, wheelAngle = 0, arrival = null, arrived = false;
+
+function busWheelRadiusPx() { return busEl.getBoundingClientRect().width * 16 / 320; }
+function spinWheels(dxPx) {
+  wheelAngle = (wheelAngle + dxPx / Math.max(4, busWheelRadiusPx()) * 57.2958) % 360;
+  wheels[0].setAttribute("transform", `rotate(${wheelAngle} 72 108)`);
+  wheels[1].setAttribute("transform", `rotate(${wheelAngle} 262 108)`);
+}
+/* The bus comes when the visitor calls it, so its arrival sound (the recording from 20s to 26s,
+   brakes fully on at 23s) can play in step with the animation. */
+let calling = false, pendingBoard = false;
+const ARRIVE_FROM = 20, ARRIVE_TO = 26, ARRIVE_STOP = 23;   // seconds in arrival.mp3
+const DEPART_FROM = 16, DEPART_TO = 20;
+function callBus() {
+  if (calling || arrived) return;
+  calling = true;
+  $("caption").classList.remove("waiting");
+  setCaption("ಬಸ್ ಬರುತ್ತಿದೆ…", "The bus is coming…");
+  Promise.race([sfxReady, new Promise(r => setTimeout(r, 1500))]).then(startArrival);
+}
+function startArrival() {
+  busEl.classList.remove("waiting");
+  if (reduced) { finishArrival(false); return; }
+  const startX = -(stage.clientWidth / 2 + busEl.getBoundingClientRect().width);
+  busX = startX;
+  const rec = !!buffers.arrival;     // keep the recording's timing even while sound is still blocked
+  arrival = { t0: performance.now(), dur: rec ? (ARRIVE_STOP - ARRIVE_FROM) * 1000 : 2600, from: startX, rec, heard: false };
+  busEl.classList.add("moving");
+  if (audioOn()) arrivalSound();
+}
+/* Start the arrival sound, or join it part-way if the visitor taps while the bus is still coming. */
+function arrivalSound() {
+  if (!arrival || arrival.heard || !audioOn()) return;
+  arrival.heard = true;
+  const el = (performance.now() - arrival.t0) / 1000;
+  if (el < .6) horn();
+  if (arrival.rec) playSeg(buffers.arrival, ARRIVE_FROM + el, ARRIVE_TO, 0, .95, 1.2);
+}
+function finishArrival(withFx = true) {
+  const heard = arrival && arrival.rec && arrival.heard;
+  arrival = null; busX = 0; arrived = true;
+  busEl.classList.remove("waiting");
+  busEl.style.transform = "translateX(-50%)";
+  busEl.classList.remove("moving");
+  if (withFx) { busEl.classList.add("stopbounce"); setTimeout(() => busEl.classList.remove("stopbounce"), 650); if (!heard) airBrake(); }
+  setCaption("ಬಸ್ ಬಂತು! ರೈಟ್ ರೈಟ್ ಒತ್ತಿ", "The bus is here. Press Right Right to board.");
+  if (pendingBoard) setTimeout(board, 900);
+}
+function setCaption(kn, en) {
+  const c = $("caption");
+  c.innerHTML = `${kn}<small>${en}</small>`;
+  delete c.dataset.hide;
+}
+
+/* ======================= Scene change: board and ride ======================= */
+function board() {
+  if (scene !== "outside") return;
+  if (!arrived) { pendingBoard = true; callBus(); return; }
+  scene = "departing";
+  $("caption").dataset.hide = "";
+  ding();
+  const real = !!buffers.arrival && audioOn();
+  if (real) playSeg(buffers.arrival, DEPART_FROM, DEPART_TO, .35, .95, .7);
+  setTimeout(() => { busEl.classList.add("lurch"); busEl.classList.add("moving"); targetSpeed = 1; }, 450);
+  setTimeout(() => {
+    outside.classList.add("away");
+    inside.classList.add("here");
+    sizeRoad();
+  }, reduced ? 600 : (real ? 3000 : 2300));
+  setTimeout(() => { scene = "inside"; outside.style.visibility = "hidden"; sizeRoad(); turnOn(); }, reduced ? 900 : (real ? 4100 : 3400));
+  setTimeout(sizeRoad, reduced ? 1200 : (real ? 4600 : 3900));      // once the zoom-in has settled
+  bellBtn.innerHTML = "<b>ರೈಟ್ ರೈಟ್</b><small>Play</small>";
+}
+
+/* ======================= Inside view: road through the windshield ======================= */
+const road = $("roadview"), rctx = road.getContext("2d");
+let horFrac = .45;                // where the horizon sits: just under the TV, so the road stays in view
+function sizeRoad() {
+  const r = road.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+  road.width = Math.max(1, r.width * dpr); road.height = Math.max(1, r.height * dpr);
+  const tvb = document.querySelector(".tv").getBoundingClientRect().bottom;
+  if (r.height > 0) horFrac = Math.min(.8, Math.max(.35, (tvb - r.top) / r.height + .03));
+}
+addEventListener("resize", sizeRoad);
+/* A winding village road seen through the windshield. Everything sits in world space:
+   object k lives at distance k*spacing along the road, and the camera moves forward by zOff. */
+const hash = k => { const s = Math.sin(k * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+let bump = 0;
+function drawRoad() {
+  const W = road.width, H = road.height; if (W < 2) return;
+  const hor = H * horFrac, cx = W / 2, f = (H - hor) * .95, camH = 1.35;
+  const curve = Math.sin(zOff * .012) * 1.1 + Math.sin(zOff * .031) * .45;
+  const bend = z => curve * z * z * .0035;
+  const P = (X, Y, z) => [cx + f * (X + bend(z)) / z, hor + f * (camH - Y) / z];
+  const turn = -curve * W * .04;
+
+  // sky and far hills
+  const g = rctx.createLinearGradient(0, 0, 0, hor);
+  g.addColorStop(0, "#6fa9d8"); g.addColorStop(.6, "#b9dbef"); g.addColorStop(1, "#efe4c6");
+  rctx.fillStyle = g; rctx.fillRect(0, 0, W, hor + 2);
+  [["#a3b7c3", .07, .6, 5], ["#88a291", .035, .9, 3]].forEach(([col, hgt, par, freq]) => {
+    rctx.fillStyle = col; rctx.beginPath(); rctx.moveTo(0, hor + 1);
+    for (let x = 0; x <= W; x += W / 40) {
+      const u = (x + turn + worldX * par * .02) / W;
+      rctx.lineTo(x, hor - H * hgt * (.55 + .45 * Math.sin(u * freq * 3.1) * Math.sin(u * freq * 1.3 + 1)));
+    }
+    rctx.lineTo(W, hor + 1); rctx.fill();
+  });
+
+  // paddy fields
+  rctx.fillStyle = "#8db24f"; rctx.fillRect(0, hor, W, H - hor);
+  rctx.strokeStyle = "rgba(90,130,50,.45)"; rctx.lineWidth = Math.max(1, W / 600);
+  for (let k = Math.floor(zOff / 3) + 1; k < zOff / 3 + 26; k++) {
+    const z = k * 3 - zOff; if (z < .8) continue;
+    const y = hor + f * camH / z; rctx.beginPath(); rctx.moveTo(0, y); rctx.lineTo(W, y); rctx.stroke();
+  }
+
+  // road: red mud shoulders, then the narrow tar strip
+  const zs = [90, 60, 42, 30, 22, 16, 12, 9, 7, 5.4, 4.2, 3.2, 2.5, 1.9, 1.45, 1.1, .85, .65];
+  const strip = (x0, x1, col) => {
+    rctx.fillStyle = col; rctx.beginPath();
+    zs.forEach((z, i) => { const p = P(x0, 0, z); i ? rctx.lineTo(...p) : rctx.moveTo(...p); });
+    [...zs].reverse().forEach(z => rctx.lineTo(...P(x1, 0, z)));
+    rctx.fill();
+  };
+  strip(-3.2, 3.2, "#a3653d");
+  strip(-2.15, 2.15, "#4d4c52");
+  strip(-.55, .55, "#56555b");
+
+  // collect roadside things, then draw far to near
+  const items = [];
+  const TS = 4.6;                                   // avenue trees
+  for (let k = Math.floor(zOff / TS) + 1; k < zOff / TS + 18; k++) {
+    const z = k * TS - zOff; if (z < .55) continue;
+    const side = hash(k) > .5 ? 1 : -1;
+    items.push({ z, kind: hash(k * 3.1) > .78 ? "tamarind" : "rain", X: side * (3.5 + hash(k * 7.7) * .8), k });
+  }
+  const PS = 6.5;                                   // palms and houses further out
+  for (let k = Math.floor(zOff / PS) + 1; k < zOff / PS + 14; k++) {
+    const z = k * PS - zOff + 2.2; if (z < .9) continue;
+    const side = hash(k + 50) > .5 ? 1 : -1, r = hash(k + 90);
+    items.push({ z, kind: r > .8 ? "house" : r > .55 ? "hay" : "palm", X: side * (7 + hash(k + 70) * 5), k });
+  }
+  items.sort((a, b) => b.z - a.z);
+
+  // canopy shadows on the road
+  items.forEach(it => {
+    if (it.kind !== "rain" && it.kind !== "tamarind") return;
+    if (it.z < .7 || it.z > 40) return;
+    rctx.fillStyle = "rgba(20,30,15,.28)"; rctx.beginPath();
+    const a = P(-2.6, 0, it.z - .9), b = P(2.6, 0, it.z - .9), c = P(2.6, 0, it.z + .9), d = P(-2.6, 0, it.z + .9);
+    if (it.z - .9 < .5) return;
+    rctx.moveTo(...a); rctx.lineTo(...b); rctx.lineTo(...c); rctx.lineTo(...d); rctx.fill();
+  });
+
+  const fog = z => Math.min(.55, z / 90);          // far things fade into haze
+  items.forEach(it => {
+    const s = f / it.z, base = P(it.X, 0, it.z);
+    rctx.globalAlpha = 1 - fog(it.z);
+    if (it.kind === "rain" || it.kind === "tamarind") {
+      const top = P(it.X, 2.8, it.z);
+      rctx.strokeStyle = "#5a4632"; rctx.lineWidth = Math.max(1, s * .38);
+      rctx.beginPath(); rctx.moveTo(...base); rctx.lineTo(...top); rctx.stroke();
+      // painted trunk bands: white, then a red ring
+      rctx.strokeStyle = "#f2efe6"; rctx.beginPath(); rctx.moveTo(...base); rctx.lineTo(...P(it.X, .7, it.z)); rctx.stroke();
+      rctx.strokeStyle = "#b8402c"; rctx.beginPath(); rctx.moveTo(...P(it.X, .7, it.z)); rctx.lineTo(...P(it.X, .9, it.z)); rctx.stroke();
+      const lean = -Math.sign(it.X) * (it.kind === "rain" ? 1.3 : .7);   // canopies reach over the road
+      const R = it.kind === "rain" ? 2.1 : 1.6, cY = it.kind === "rain" ? 3.5 : 3.1;
+      const greens = it.kind === "rain" ? ["#2f5a2a", "#3d6b31", "#4b7a37"] : ["#2f5528", "#3a6a2e", "#447536"];
+      [[0, 0, 1, 0], [-.7, .3, .7, 1], [.8, .4, .7, 1], [0, .8, .65, 2], [lean * .6, -.3, .6, 0]].forEach(([dx, dy, rr, ci]) => {
+        const p = P(it.X + lean + dx * R * .8, cY + dy * R * .5, it.z);
+        rctx.fillStyle = greens[ci]; rctx.beginPath(); rctx.ellipse(p[0], p[1], s * R * rr, s * R * rr * .62, 0, 0, 6.283); rctx.fill();
+      });
+    } else if (it.kind === "palm") {
+      const top = P(it.X + .4, 6, it.z);
+      rctx.strokeStyle = "#6b5135"; rctx.lineWidth = Math.max(1, s * .16);
+      rctx.beginPath(); rctx.moveTo(...base); rctx.quadraticCurveTo(base[0] + s * .5, (base[1] + top[1]) / 2, ...top); rctx.stroke();
+      rctx.strokeStyle = "#3e6d2d"; rctx.lineWidth = Math.max(1, s * .12);
+      for (let q = 0; q < 6; q++) {
+        const ang = -Math.PI / 2 + (q - 2.5) * .62;
+        rctx.beginPath(); rctx.moveTo(...top);
+        rctx.quadraticCurveTo(top[0] + Math.cos(ang) * s * 1.1, top[1] + Math.sin(ang) * s * .8 - s * .2, top[0] + Math.cos(ang) * s * 1.6, top[1] + Math.sin(ang) * s * .5 + s * .6);
+        rctx.stroke();
+      }
+    } else if (it.kind === "house") {
+      const l = P(it.X - 1.4, 0, it.z), r = P(it.X + 1.4, 1.8, it.z);
+      rctx.fillStyle = "#efe6d6"; rctx.fillRect(l[0], r[1], r[0] - l[0], l[1] - r[1]);
+      const rl = P(it.X - 1.7, 1.8, it.z), rr2 = P(it.X + 1.7, 1.8, it.z), rt = P(it.X, 2.9, it.z);
+      rctx.fillStyle = "#b9552f"; rctx.beginPath(); rctx.moveTo(...rl); rctx.lineTo(...rr2); rctx.lineTo(rr2[0] - s * .5, rt[1]); rctx.lineTo(rl[0] + s * .5, rt[1]); rctx.fill();
+      const d0 = P(it.X - .3, 0, it.z), d1 = P(it.X + .3, 1.1, it.z);
+      rctx.fillStyle = "#5a3d2b"; rctx.fillRect(d0[0], d1[1], d1[0] - d0[0], d0[1] - d1[1]);
+    } else {                                         // haystack
+      const t = P(it.X, 2.2, it.z), l = P(it.X - 1, 0, it.z), r = P(it.X + 1, 0, it.z);
+      rctx.fillStyle = "#d6a84a"; rctx.beginPath(); rctx.moveTo(...l); rctx.quadraticCurveTo(t[0], t[1] - s * .4, ...r); rctx.fill();
+    }
+  });
+  rctx.globalAlpha = 1;
+
+  // how much tree shade is on the bus right now (used to dim the cabin)
+  let shade = 0;
+  items.forEach(it => { if ((it.kind === "rain" || it.kind === "tamarind") && it.z < 3) shade += Math.max(0, 1 - Math.abs(it.z - 1.4) / 1.6); });
+  return Math.min(1, shade);
+}
+
+/* ======================= Main animation loop ======================= */
+let last = performance.now(), sweepX = 130, nextSweep = 2, audioTick = 0;
+const cab = $("cab"), sweep = $("sweep"), worldEl = $("world");
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  speed += (targetSpeed - speed) * Math.min(1, dt * (targetSpeed > speed ? .8 : 1.6));
+  if (Math.abs(targetSpeed - speed) < .002) speed = targetSpeed;
+  const px = speed * 300 * dt;
+  worldX += px; zOff += speed * 20 * dt;
+
+  if (scene !== "inside") {
+    if (arrival) {
+      const t = Math.min(1, (now - arrival.t0) / arrival.dur), e = 1 - Math.pow(1 - t, 3);
+      const nx = arrival.from * (1 - e);
+      spinWheels(nx - busX); busX = nx;
+      busEl.style.transform = `translateX(calc(-50% + ${busX}px))`;
+      if (t >= 1) finishArrival(true);
+    } else if (speed > 0) spinWheels(px);
+    layers.forEach(l => l.style.backgroundPositionX = `${-worldX * (+l.dataset.f)}px`);
+    worldEl.style.transform = `translateX(${-worldX}px)`;
+  }
+  if (scene !== "outside" && inside.classList.contains("here")) {
+    const shade = drawRoad() || 0;
+    const t = now / 1000, amp = speed;
+    if (!reduced && speed > .3 && Math.random() < dt * .22 * speed) bump = 1;      // the odd pothole
+    bump = Math.max(0, bump - dt * 3);
+    const by = Math.sin(bump * 16) * bump * 5;
+    cab.style.transform = reduced ? "" :
+      `translate(${Math.sin(t * 1.3) * 1.5 * amp}px, ${(Math.sin(t * 9) * 1.1 + Math.sin(t * 23) * .5) * amp + by}px) rotate(${Math.sin(t * .9) * .3 * amp + by * .08}deg)`;
+    sweep.style.opacity = reduced ? 0 : (shade * .6).toFixed(2);     // tree shade passing over the bus
+  }
+  audioTick += dt;
+  if (audioTick > .1) { audioTick = 0; engineUpdate(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ======================= YouTube player (official embed, its own controls off) ======================= */
+const embedSrc = id =>
+  `https://www.youtube.com/embed/${id}?enablejsapi=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&rel=0&playsinline=1` +
+  (hosted ? `&origin=${encodeURIComponent(location.origin)}` : "");
+function createPlayer(id) {
+  frame = document.createElement("iframe");
+  frame.className = "player"; frame.title = "Bus TV";
+  frame.allow = "autoplay; encrypted-media"; frame.referrerPolicy = "strict-origin-when-cross-origin";
+  frame.src = embedSrc(id); loadedId = id;
+  frame.addEventListener("load", () => { handshake(); setTimeout(handshake, 600); setTimeout(handshake, 1800); });
+  screen.prepend(frame);
+}
+function send(func, args = []) {
+  if (frame && frame.contentWindow) frame.contentWindow.postMessage(JSON.stringify({ event:"command", func, args, id:"bus", channel:"widget" }), "*");
+}
+function handshake() {
+  if (!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage(JSON.stringify({ event:"listening", id:"bus", channel:"widget" }), "*");
+  send("addEventListener", ["onStateChange"]); send("addEventListener", ["onError"]);
+}
+function playCurrent() {
+  const id = SONGS[cur].id;
+  if (loadedId !== id) { loadedId = id; send("loadVideoById", [id]); } else send("playVideo");
+}
+addEventListener("message", e => {
+  let host = ""; try { host = new URL(e.origin).hostname; } catch (_) { return; }
+  if (!/(^|\.)youtube(-nocookie)?\.com$/.test(host)) return;
+  let d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (_) { return; }
+  if (!d || !d.event) return;
+  playerReady = true;
+  let state = null;
+  if (d.event === "onStateChange") state = d.info;
+  else if (d.info && typeof d.info.playerState === "number") state = d.info.playerState;
+  if (d.info && typeof d.info.currentTime === "number" && d.info.duration > 0) { progress = Math.min(1, d.info.currentTime / d.info.duration); drawRoute(); }
+  if (state !== null && state !== lastState) {
+    lastState = state;
+    if (state === 1) { setPlaying(true); targetSpeed = 1; }
+    else if (state === 2) { setPlaying(false); stopBus(); }
+    else if (state === -1 || state === 5) setPlaying(false);
+    else if (state === 0) { progress = 1; drawRoute(); arrive(); }
+  }
+  if (d.event === "onError") {
+    note("ಈ ಹಾಡು ಇಲ್ಲಿ ಪ್ಲೇ ಆಗಲ್ಲ. ಮುಂದಿನ ಸ್ಟಾಪ್… (This song can't play here. Skipping.)");
+    setTimeout(() => go(cur + 1, true), 2500);
+  }
+});
+
+/* ======================= The old TV ======================= */
+function turnOn() {
+  if (tv !== "off" || scene !== "inside") return;
+  tv = "warming";
+  inside.classList.add("on");
+  $("tvstate").textContent = "WARMING UP";
+  thunk();
+  screen.classList.remove("cooling"); void screen.offsetWidth; screen.classList.add("warming");
+  if (!hosted) {
+    setTimeout(() => {
+      screen.classList.remove("warming");
+      if (!screen.querySelector(".offline")) {
+        const msg = document.createElement("div"); msg.className = "offline";
+        msg.innerHTML = "<b>ಟಿವಿ ಆನ್ ಆಗಲು ಈ ಪೇಜ್ ಅನ್ನು ವೆಬ್‌ಸೈಟ್ ಆಗಿ ತೆರೆಯಿರಿ</b>YouTube won't play songs when this file is opened from your computer or a preview. Put it online first (for example app.netlify.com/drop) and open that link.";
+        screen.appendChild(msg);
+      }
+      tv = "off"; inside.classList.remove("on"); $("tvstate").textContent = "TV OFF";
+    }, 800);
+    return;
+  }
+  if (!frame) createPlayer(SONGS[cur].id);
+  setTimeout(() => { staticOn(); hiss(1.1, .05); }, 280);
+  const started = Date.now();
+  (function waitReady() {
+    const el = Date.now() - started;
+    if ((playerReady && el > 1200) || el > 7000) {
+      screen.classList.remove("warming"); staticOff(); screen.classList.add("live");
+      tv = "on"; $("tvstate").textContent = "ON AIR";
+      playCurrent();
+    } else setTimeout(waitReady, 100);
+  })();
+}
+function turnOff() {
+  if (tv !== "on") return;
+  tv = "cooling"; send("pauseVideo"); setPlaying(false);
+  screen.classList.remove("warming"); void screen.offsetWidth; screen.classList.add("cooling");
+  setTimeout(() => screen.classList.remove("live"), 180);
+  setTimeout(() => { screen.classList.remove("cooling"); inside.classList.remove("on"); tv = "off"; $("tvstate").textContent = "TV OFF"; }, 560);
+}
+function channelSwitch(then) { staticOn(); hiss(.35, .04); setTimeout(() => { staticOff(); then(); }, 380); }
+
+const nctx = $("noise").getContext("2d");
+let snowOn = false, roll = 0;
+function staticOn() { screen.classList.add("static"); if (!snowOn) { snowOn = true; requestAnimationFrame(snow); } }
+function staticOff() { screen.classList.remove("static"); snowOn = false; }
+function snow() {
+  if (!snowOn) return;
+  const w = 160, h = 120, img = nctx.createImageData(w, h), px = img.data;
+  roll = (roll + 3) % h;
+  for (let y = 0; y < h; y++) {
+    const band = Math.abs(y - roll) < 10 ? 40 : 0;
+    for (let x = 0; x < w; x++) {
+      const v = Math.min(255, ((Math.random() * 215) | 0) + band), i = (y * w + x) * 4;
+      px[i] = v; px[i + 1] = v; px[i + 2] = v + 8; px[i + 3] = 255;
+    }
+  }
+  nctx.putImageData(img, 0, 0);
+  requestAnimationFrame(snow);
+}
+
+/* ======================= Actions ======================= */
+function go(i, autoplay) {
+  cur = (i + SONGS.length) % SONGS.length;
+  progress = 0; lastState = null; note(""); render();
+  if (scene === "outside" && autoplay) { board(); return; }
+  if (scene !== "inside") return;
+  if (tv === "on") channelSwitch(() => { playCurrent(); targetSpeed = 1; });
+  else if (tv === "off" && autoplay) turnOn();
+}
+function arrive() {
+  if (cur === SONGS.length - 1) {
+    note("ಬೆಂಗಳೂರು ಬಂತು! ಮತ್ತೆ ಮೈಸೂರಿನಿಂದ… (Bengaluru reached. Back to Mysuru.)");
+    setTimeout(() => go(0, true), 2000);
+  } else go(cur + 1, true);
+}
+function stopBus() { if (targetSpeed > 0) { targetSpeed = 0; if (audioOn()) setTimeout(airBrake, 900); } }
+function setPlaying(p) {
+  playing = p;
+  if (tv === "on") $("tvstate").textContent = p ? "ON AIR" : "HOLD ON";
+  if (scene === "outside") return;
+  bellBtn.classList.toggle("pause", p);
+  bellBtn.innerHTML = p ? "<b>ಹೋಲ್ಡಾನ್</b><small>Pause</small>" : "<b>ರೈಟ್ ರೈಟ್</b><small>Play</small>";
+  bellBtn.setAttribute("aria-label", p ? "Hold on: pause the song and stop the bus" : "Right right: play");
+}
+function note(t) { $("note").textContent = t; }
+function drawRoute() {
+  const pct = ((cur + progress) / SONGS.length) * 100;
+  $("done").style.width = `calc(8px + (100% - 16px) * ${pct / 100})`;
+  $("minibus").style.left = `calc(14px + (100% - 28px) * ${pct / 100})`;
+  document.querySelectorAll(".stop").forEach((s, k) => s.classList.toggle("passed", k <= cur));
+}
+function render() {
+  const s = SONGS[cur];
+  $("nowLeg").textContent = `${STOPS[cur].kn} ➜ ${STOPS[cur + 1].kn}`;
+  $("nowSong").textContent = s.kn;
+  $("nowMeta").textContent = `${s.en} · ${s.film} · ${s.credit}`;
+  document.querySelectorAll(".ticket").forEach((t, k) => t.classList.toggle("active", k === cur));
+  drawRoute();
+}
+
+bellBtn.addEventListener("click", () => {
+  unlockAudio();
+  if (scene === "outside") { board(); return; }
+  if (scene !== "inside") return;
+  if (tv === "off") { ding(); turnOn(); return; }
+  if (tv !== "on") return;
+  if (playing) { send("pauseVideo"); setPlaying(false); stopBus(); }
+  else { ding(); playCurrent(); setTimeout(() => targetSpeed = 1, 500); }
+});
+$("power").addEventListener("click", () => { if (tv === "on") turnOff(); else if (tv === "off") turnOn(); });
+$("next").addEventListener("click", () => { unlockAudio(); if (scene === "inside") ding(); go(cur + 1, scene === "inside"); });
+$("prev").addEventListener("click", () => { unlockAudio(); go(cur - 1, scene === "inside"); });
+document.addEventListener("keydown", e => {
+  if (e.target.closest("button")) return;
+  if (e.code === "Space") { e.preventDefault(); bellBtn.click(); }
+  if (e.key === "ArrowRight") $("next").click();
+  if (e.key === "ArrowLeft") $("prev").click();
+});
+
+/* ======================= Sound (all made in the browser, no audio files) ======================= */
+let ac = null, soundOn = true, unlocked = false, eng = null;
+const sndBtn = $("snd");
+let whenRunning = null;
+function audio() {
+  if (!ac) {
+    const AC = window.AudioContext || window.webkitAudioContext; ac = new AC();
+    // resolves once the browser really lets sound play (after a genuine tap or key press)
+    whenRunning = new Promise(res => {
+      const check = () => { if (ac.state === "running") { ac.removeEventListener("statechange", check); res(); } };
+      ac.addEventListener("statechange", check); check();
+    }).then(() => { unlocked = true; sndBtn.hidden = false; return sfxReady; })
+      .then(() => {
+        engineStart();
+        if (arrival) arrivalSound();                         // bus still coming: join its sound
+        else if (scene === "outside" && arrived) horn();      // bus waiting: it honks hello
+      });
+  }
+  return ac;
+}
+function audioOn() { return soundOn && ac && (unlocked || ac.state === "running"); }
+/* Real recordings live in the sounds/ folder next to this page. If a file is missing,
+   the page falls back to a sound made in the browser. */
+const SFX = { idle:"sounds/idle.mp3", ride:"sounds/ride.mp3", horn:"sounds/horn.mp3", arrival:"sounds/arrival.mp3" };
+const buffers = {};
+async function loadSfx() {
+  if (!hosted) return;
+  await Promise.all(Object.entries(SFX).map(async ([k, url]) => {
+    try { const r = await fetch(url); if (!r.ok) return; buffers[k] = await audio().decodeAudioData(await r.arrayBuffer()); } catch (_) {}
+  }));
+}
+let segUntil = 0, sfxReady = Promise.resolve();
+function unlockAudio() {
+  try { audio(); if (ac.state !== "running") ac.resume().catch(() => {}); } catch (_) { return Promise.resolve(); }
+  return whenRunning;
+}
+/* Play one stretch of a recording, e.g. 20s–26s of the arrival sound, with a soft fade at the end. */
+function playSeg(buf, from, to, at, vol, fade) {
+  if (!audioOn()) return;
+  try {
+    const s = ac.createBufferSource(), g = ac.createGain(), t = ac.currentTime + at, len = to - from;
+    s.buffer = buf;
+    g.gain.setValueAtTime(vol, t); g.gain.setValueAtTime(vol, t + len - fade); g.gain.linearRampToValueAtTime(.0001, t + len);
+    s.connect(g).connect(ac.destination); s.start(t, from, len);
+    segUntil = Math.max(segUntil, t + len - fade * .5);   // engine loops stay quiet while this plays
+  } catch (_) {}
+}
+sndBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  soundOn = !soundOn;
+  sndBtn.classList.toggle("off", !soundOn);
+  sndBtn.textContent = soundOn ? "🔊 ಬಸ್ ಸೌಂಡ್ · Bus sound" : "🔇 ಬಸ್ ಸೌಂಡ್ ಆಫ್ · Sound off";
+});
+/* The first tap or key press anywhere unlocks sound and calls the bus.
+   (Only these events count as a "tap" for sound on phones: pointerup/touchend/click/keydown.) */
+function firstTouch() {
+  unlockAudio().then(() => { if (scene === "outside" && !calling) callBus(); });
+}
+["pointerup", "touchend", "click", "keydown"].forEach(ev => document.addEventListener(ev, firstTouch, { passive:true }));
+
+function loopSource(buf) {
+  const src = ac.createBufferSource(), g = ac.createGain();
+  src.buffer = buf; src.loop = true; g.gain.value = 0;
+  src.connect(g).connect(ac.destination); src.start();
+  return { src, g };
+}
+function engineStart() {
+  if (eng || !ac) return;
+  if (buffers.idle) {               // real recordings
+    eng = { real:true, idle: loopSource(buffers.idle), ride: buffers.ride ? loopSource(buffers.ride) : null };
+    return;
+  }
+  try {
+    const o1 = ac.createOscillator(), o2 = ac.createOscillator(), lp = ac.createBiquadFilter();
+    const am = ac.createGain(), lfo = ac.createOscillator(), lfoG = ac.createGain(), g = ac.createGain();
+    o1.type = "sawtooth"; o2.type = "square"; lp.type = "lowpass"; lp.frequency.value = 160; lp.Q.value = 3;
+    lfo.type = "sine"; lfo.frequency.value = 9; lfoG.gain.value = .35; am.gain.value = .65; g.gain.value = 0;
+    lfo.connect(lfoG); lfoG.connect(am.gain);
+    o1.connect(lp); o2.connect(lp); lp.connect(am); am.connect(g); g.connect(ac.destination);
+    o1.start(); o2.start(); lfo.start();
+    eng = { o1, o2, lp, lfo, g };
+  } catch (_) {}
+}
+function engineUpdate() {
+  if (!eng || !ac) return;
+  if (eng.real) {
+    const t = ac.currentTime, on = soundOn ? 1 : 0, duck = playing ? .4 : 1;
+    let idleV, rideV, rate;
+    if (scene === "inside") { idleV = .5 * (1 - speed); rideV = .7 * speed; rate = 1 + .08 * speed; }
+    else { idleV = .55; rideV = 0; rate = 1 + .35 * speed; }      // revving as it pulls away
+    if (!eng.ride) idleV = Math.max(idleV, .5);
+    if (t < segUntil || (scene === "outside" && !arrived)) { idleV = 0; rideV = 0; }   // a recording segment is playing, or no bus yet
+    eng.idle.src.playbackRate.setTargetAtTime(rate, t, .3);
+    eng.idle.g.gain.setTargetAtTime(idleV * duck * on, t, .3);
+    if (eng.ride) eng.ride.g.gain.setTargetAtTime(rideV * duck * on, t, .4);
+    return;
+  }
+  const t = ac.currentTime, f = 26 + speed * 34;
+  eng.o1.frequency.setTargetAtTime(f, t, .15);
+  eng.o2.frequency.setTargetAtTime(f * .5, t, .15);
+  eng.lfo.frequency.setTargetAtTime(f / 3, t, .15);
+  eng.lp.frequency.setTargetAtTime(130 + speed * 260, t, .2);
+  let v = soundOn ? (.05 + .06 * speed) : 0;
+  if (playing) v *= .45;                 // keep the song in front
+  eng.g.gain.setTargetAtTime(v, t, .25);
+}
+function tone(type, freq, t, dur, vol, filt) {
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .02);
+  g.gain.setValueAtTime(vol, t + dur - .05); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  if (filt) { const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = filt; o.connect(lp).connect(g); } else o.connect(g);
+  g.connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+}
+function horn() {           // "paam paam"
+  if (!audioOn()) return;
+  if (buffers.horn) {
+    [0, .45].forEach(off => { const s = ac.createBufferSource(), g = ac.createGain();
+      s.buffer = buffers.horn; g.gain.value = .6; s.connect(g).connect(ac.destination); s.start(ac.currentTime + .02 + off); });
+    return;
+  }
+  try { const t = ac.currentTime + .02;
+    [0, .5].forEach(off => { tone("square", 392, t + off, .38, .07, 1800); tone("square", 494, t + off, .38, .06, 1800); });
+  } catch (_) {}
+}
+function noise(dur, vol, type, freq, at = 0) {
+  const t = ac.currentTime + at, n = Math.floor(ac.sampleRate * dur);
+  const buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+  src.buffer = buf; f.type = type; f.frequency.value = freq;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  src.connect(f).connect(g).connect(ac.destination); src.start(t);
+}
+function airBrake() { if (audioOn()) try { noise(.7, .06, "highpass", 2600); } catch (_) {} }
+function hiss(dur, vol) { if (audioOn()) try { noise(dur, vol, "bandpass", 3200); } catch (_) {} }
+function ding() {           // conductor's double bell
+  if (!audioOn()) return;
+  try { [0, .2].forEach(off => { const t = ac.currentTime + off;
+    [[2100, .2, .9], [5800, .05, .45], [11300, .025, .25]].forEach(([f, v, len]) => {
+      const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + len);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + len + .05); }); }); } catch (_) {}
+}
+function thunk() {
+  if (!audioOn()) return;
+  try { const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(40, t + .25);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .3);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + .35); } catch (_) {}
+}
+
+/* ======================= Start ======================= */
+render();
+// Load the recordings straight away; they can play from the first tap.
+try { audio(); sfxReady = loadSfx(); } catch (_) {}
+// Browsers block sound until the first tap. If this one already allows it (e.g. a repeat visit), the bus just comes.
+setTimeout(() => { try { if (ac && ac.state === "running") callBus(); } catch (_) {} }, 1000);
+</script>
+</body>
+</html>
