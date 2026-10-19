@@ -999,7 +999,7 @@ function audio() {
       ac.addEventListener("statechange", check); check();
     }).then(() => { unlocked = true; sndBtn.hidden = false; return sfxReady; })
       .then(() => {
-        engineStart();
+        // no continuous engine sound: only the arrival, departure, horn, bell and brakes are heard
         if (arrival) arrivalSound();                         // bus still coming: join its sound
         else if (scene === "outside" && arrived) horn();      // bus waiting: it honks hello
       });
@@ -1009,7 +1009,7 @@ function audio() {
 function audioOn() { return soundOn && ac && (unlocked || ac.state === "running"); }
 /* Real recordings live in the sounds/ folder next to this page. If a file is missing,
    the page falls back to a sound made in the browser. */
-const SFX = { idle:"sounds/idle.mp3", ride:"sounds/ride.mp3", horn:"sounds/horn.mp3", arrival:"sounds/arrival.mp3" };
+const SFX = { horn:"sounds/horn.mp3", arrival:"sounds/arrival.mp3" };
 const buffers = {};
 async function loadSfx() {
   if (!hosted) return;
