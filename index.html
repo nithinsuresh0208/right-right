@@ -32,10 +32,26 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 [hidden]{display:none!important}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{
   background:radial-gradient(120% 60% at 50% 0%, #1b3236 0%, transparent 60%), var(--night);
-  color:var(--fg);font:16px/1.6 var(--body);min-height:100vh;
+  color:var(--fg);font:16px/1.6 var(--body);
 }
+/* One screen, no page scroll: top bar, the bus scene (takes all spare height), and the control dock. */
+.app{height:100vh;height:100dvh;width:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.topbar{display:flex;align-items:center;gap:12px;
+  padding-block:8px;padding-left:max(12px, env(safe-area-inset-left, 0px));padding-right:max(12px, env(safe-area-inset-right, 0px))}
+.logo{flex:none;font-family:var(--display);font-weight:800;font-size:22px;line-height:1;white-space:nowrap}
+.logo small{display:block;font:500 9px/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.dock{background:linear-gradient(180deg,#132426,#0d191b);border-top:1px solid var(--cabin-edge);
+  padding-block:6px 16px;padding-left:max(12px, env(safe-area-inset-left, 0px));padding-right:max(12px, env(safe-area-inset-right, 0px))}
+.dock-in{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:2px}
+.nowrow{display:flex;align-items:center;gap:10px;min-width:0}
+.pill{flex:none;font:600 13px/1 var(--body);color:var(--fg);background:var(--cabin);border:1px solid var(--cabin-edge);
+  border-radius:999px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.pill:hover{border-color:var(--led)}
+.pill:focus-visible{outline:3px solid var(--led);outline-offset:2px}
 .wrap{
   max-width:720px;margin:0 auto;
   padding-left:max(16px, env(safe-area-inset-left, 0px));
@@ -46,15 +62,15 @@ body{
 
 /* ---------- Destination board ---------- */
 .board{
-  background:#050505;border-radius:10px;border:3px solid #2a2a2a;
-  padding:8px 14px;display:flex;align-items:center;gap:12px;
-  box-shadow:0 0 0 4px var(--ksrtc), 0 10px 30px rgba(0,0,0,.4);overflow:hidden;
+  flex:1;min-width:0;background:#050505;border-radius:8px;border:2px solid #2a2a2a;
+  padding:4px 10px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 0 0 3px var(--ksrtc), 0 6px 18px rgba(0,0,0,.4);overflow:hidden;
 }
 .board .route{flex:none;font-family:var(--mono);font-weight:700;color:#050505;background:var(--led);border-radius:4px;padding:2px 8px;font-size:15px}
 .marquee{flex:1;min-width:0;overflow:hidden;position:relative}
 .marquee span{
   display:inline-block;white-space:nowrap;padding-left:100%;
-  font-family:var(--display);font-weight:700;font-size:21px;color:var(--led);
+  font-family:var(--display);font-weight:700;font-size:18px;color:var(--led);
   text-shadow:0 0 6px rgba(255,178,62,.75), 0 0 16px rgba(255,140,30,.35);
   animation:scroll 16s linear infinite;
 }
@@ -62,20 +78,14 @@ body{
 @keyframes scroll{to{transform:translateX(-100%)}}
 
 /* ---------- Title ---------- */
-.title{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:6px 16px}
-.title h1{margin:0;font-family:var(--display);font-weight:800;line-height:1;font-size:clamp(42px, 12vw, 70px);text-wrap:balance}
-.title h1 small{display:block;font-size:.3em;font-weight:500;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
-.title p{margin:0;color:var(--muted);font-size:15px;max-width:32ch}
-.plate{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.08em;background:#f5f1e6;color:#111;border:2px solid #111;border-radius:4px;padding:1px 8px;display:inline-block;margin-top:6px}
+.plate{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.08em;background:#f5f1e6;color:#111;border:2px solid #111;border-radius:4px;padding:0 6px;display:inline-block;white-space:nowrap}
 
 /* ---------- Stage ---------- */
 .stage{
-  position:relative;width:100%;height:clamp(470px, 84vh, 1100px);height:clamp(470px, 84svh, 1100px);
-  overflow:hidden;background:#6fa9d8;isolation:isolate;
-  border-block:1px solid var(--cabin-edge);
+  position:relative;width:100%;min-height:0;
+  overflow:hidden;background:#6fa9d8;isolation:isolate;container-type:size;
+  border-top:1px solid var(--cabin-edge);
 }
-.wrap.head{padding-block-end:18px}
-.wrap.body{padding-block-start:20px}
 .snd{
   position:absolute;top:12px;right:12px;z-index:30;
   font:600 13px/1 var(--body);color:#1b1206;background:var(--led);border:0;border-radius:999px;
@@ -112,10 +122,10 @@ body{
 .road{bottom:4%;height:26%}
 .ground{bottom:0;height:5%;z-index:6}
 .world{position:absolute;inset:0;will-change:transform}
-.busstop{position:absolute;bottom:29%;left:54%;width:min(50%,34vh)}
-.milestone{position:absolute;bottom:25%;left:5%;width:min(13%,8vh)}
+.busstop{position:absolute;bottom:29%;left:54%;width:min(50%,34vh);width:min(50%,40cqh)}
+.milestone{position:absolute;bottom:25%;left:5%;width:min(13%,8vh);width:min(13%,9.5cqh)}
 .bus{
-  position:absolute;bottom:7.5%;left:50%;width:min(84%,62vh);z-index:5;
+  position:absolute;bottom:7.5%;left:50%;width:min(84%,62vh);width:min(84%,74cqh);z-index:5;
   transform:translateX(-50%);will-change:transform;
 }
 .bus svg{display:block;width:100%;height:auto;overflow:visible}
@@ -158,7 +168,7 @@ body{
   background:var(--ksrtc);color:#fff4e6;font-family:var(--display);font-weight:700;font-size:clamp(15px,2.2vh,22px);line-height:1;
   padding:6px 12px 4px;border-radius:999px;white-space:nowrap;
 }
-.steer{position:absolute;right:9%;bottom:30%;width:min(26%,24vh)}
+.steer{position:absolute;right:9%;bottom:30%;width:min(26%,24vh);width:min(26%,28cqh)}
 .bunting{position:absolute;left:0;right:0;top:7%;height:14px;display:flex;justify-content:space-between;z-index:2}
 .bunting i{width:7.14%;height:14px;clip-path:polygon(0 0,100% 0,50% 100%)}
 .bunting i:nth-child(5n+1){background:var(--ksrtc)}
@@ -188,12 +198,13 @@ body{
   background:radial-gradient(circle at 4px 0, #f1ece2 3px, transparent 3.5px) 0 0/8px 6px repeat-x}
 .tvmount{
   position:absolute;top:8.5%;left:50%;transform:translateX(-50%);width:min(88%,66vh);z-index:3;
+  width:clamp(260px, calc(95cqh - 80px), min(88%, 680px));      /* TV fits the stage height: bottom stays near 62% */
 }
 @media (max-width:600px){            /* phones: lower the dashboard so more road shows under the TV */
   .windshield{height:62%}
   .dash{top:80%;height:8%}
   .seats{height:14%}
-  .tvmount{width:max(84%, 236px)}
+  .tvmount{width:max(84%, 236px);width:clamp(236px, calc(71cqh - 60px), 86%)}
 }
 .tvmount::before,.tvmount::after{content:"";position:absolute;top:-24px;width:5px;height:26px;background:#444;border-radius:2px}
 .tvmount::before{left:22%}
@@ -241,52 +252,75 @@ body{
 .knob.dial{cursor:default;background:repeating-conic-gradient(#3b352d 0 10deg, #2b2721 10deg 20deg)}
 
 /* ---------- Now playing + controls ---------- */
-.now{display:flex;flex-direction:column;gap:2px;text-align:center}
-.now .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.now .song{font-family:var(--display);font-weight:700;font-size:clamp(22px,6vw,28px);line-height:1.2;text-wrap:balance}
-.now .meta{color:var(--muted);font-size:14px}
-.controls{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
-.btn{font:inherit;color:var(--fg);background:var(--cabin);border:1px solid var(--cabin-edge);border-radius:12px;padding:10px 12px;cursor:pointer;line-height:1.2;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
-.btn b{font-family:var(--display);font-size:17px;font-weight:700}
-.btn small{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.now{flex:1;min-width:0;display:flex;flex-direction:column;gap:0}
+.now > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);line-height:1.4}
+.now .song{font-family:var(--display);font-weight:700;font-size:clamp(17px,2.6vh,22px);line-height:1.25}
+.now .meta{color:var(--muted);font-size:12px;line-height:1.4}
+.controls{display:flex;justify-content:center;align-items:center;gap:clamp(6px,2.5vw,14px);padding-top:2px}
+.btn{font:inherit;color:var(--fg);background:var(--cabin);border:1px solid var(--cabin-edge);border-radius:12px;padding:6px 10px;cursor:pointer;line-height:1.15;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:52px}
+.btn b{font-family:var(--display);font-size:16px;font-weight:700}
+.btn small{font-size:10px;color:var(--muted);letter-spacing:.06em}
 .btn:hover{border-color:var(--led)}
 .btn:focus-visible{outline:3px solid var(--led);outline-offset:2px}
-.bell{width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffd27a, var(--led) 45%, #c97b12 100%);color:#2a1500;border:4px solid #3a2a12;box-shadow:0 8px 0 #6e4610, 0 14px 24px rgba(0,0,0,.45);justify-content:center}
+.bell{width:clamp(70px,10vh,92px);height:clamp(70px,10vh,92px);padding:4px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffd27a, var(--led) 45%, #c97b12 100%);color:#2a1500;border:4px solid #3a2a12;box-shadow:0 8px 0 #6e4610, 0 14px 24px rgba(0,0,0,.45);justify-content:center}
 .bell small{color:#4a2c05}
-.bell b{font-size:22px}
+.bell b{font-size:clamp(15px,2vh,19px);line-height:1.1}
 .bell:active{transform:translateY(5px);box-shadow:0 3px 0 #6e4610, 0 6px 12px rgba(0,0,0,.4)}
 .bell:hover{border-color:#3a2a12}
 .bell.pause{background:radial-gradient(circle at 35% 30%, #ff9a85, var(--ksrtc) 50%, #8a2216 100%);color:#fff4e6}
 .bell.pause small{color:#ffe0d6}
-.note{min-height:1.4em;text-align:center;font-size:13px;color:var(--led);margin:-8px 0 0}
+.note{font-size:12px;color:var(--led);line-height:1.4}
+.note:empty{display:none}
 
 /* ---------- Route strip ---------- */
-.route-strip{position:relative;padding:34px 6px 46px;cursor:pointer;touch-action:none;border-radius:12px}
+.route-strip{position:relative;padding:28px 6px 40px;cursor:pointer;touch-action:none;border-radius:12px}
 .route-strip:focus-visible{outline:3px solid var(--led);outline-offset:4px}
 .route-strip:hover .roadline{background:#36504f}
 .route-strip.dragging .minibus,.route-strip.dragging .roadline .done{transition:none}
 .seektip{position:absolute;top:-30px;transform:translateX(-50%);white-space:nowrap;pointer-events:none;z-index:3;text-align:center;
   background:var(--fg);color:var(--ink);font:700 13px/1.25 var(--display);padding:5px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 .seektip small{display:block;font:400 11px/1.2 var(--body);color:#6b5f52}
-.seekrow{display:flex;justify-content:center;gap:10px;margin-top:-6px}
-.btn.small{flex-direction:row;padding:7px 14px;font-size:14px;border-radius:999px}
+
 .roadline{position:relative;height:6px;border-radius:3px;background:#2b3c3f}
 .roadline .done{position:absolute;inset:0 auto 0 0;width:0;border-radius:3px;background:var(--led);transition:width .8s linear}
 .stops{display:flex;justify-content:space-between;margin-top:-11px;position:relative}
 .stop{position:relative;width:16px;height:16px;flex:none}
 .stop i{display:block;width:16px;height:16px;border-radius:50%;background:var(--night);border:3px solid #2b3c3f}
 .stop.passed i{border-color:var(--led);background:var(--led)}
-.stop span{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:12px;white-space:nowrap;color:var(--muted)}
-.stop:nth-child(even) span{top:38px}
+.stop span{position:absolute;top:19px;left:50%;transform:translateX(-50%);font-size:12px;line-height:1.2;white-space:nowrap;color:var(--muted)}
+.stop:nth-child(even) span{top:34px}
 .stop:first-child span{left:0;transform:none}
 .stop:last-child span{left:auto;right:0;transform:none}
 .minibus{position:absolute;top:2px;left:14px;transform:translateX(-50%);transition:left .8s linear;width:44px;height:26px}
-@media (max-width:460px){ .stop span{font-size:11px} }
+@media (max-width:460px){ .stop span{font-size:11px} .logo{font-size:19px} .btn{min-width:46px;padding:5px 8px} }
+/* Phone held sideways: scene on the left, controls in a column on the right */
+@media (orientation:landscape) and (max-height:520px){
+  .app{grid-template-columns:minmax(0,1fr) min(340px,44vw);grid-template-rows:auto minmax(0,1fr)}
+  .topbar{grid-column:1 / -1;padding-block:5px}
+  .stage{grid-column:1;grid-row:2}
+  .dock{grid-column:2;grid-row:2;border-top:0;border-left:1px solid var(--cabin-edge);display:flex;align-items:center;overflow:hidden;padding-block:6px 14px}
+  .dock-in{width:100%}
+  .now .meta{display:none}
+  .route-strip{padding:24px 4px 36px}
+  .stop span{font-size:10px}
+  .btn{min-width:40px;padding:4px 6px}
+  .tvmount{width:clamp(220px, calc(85cqh - 40px), 86%)}
+}
+@media (max-height:640px){ .now .meta{display:none} .route-strip{padding-top:24px;padding-bottom:36px} }
 
 /* ---------- Tickets ---------- */
-.tickets-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.tickets-head h2{margin:0;font-family:var(--display);font-size:22px}
-.tickets-head span{font-size:13px;color:var(--muted)}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:82dvh;max-height:82vh;overflow:auto;overscroll-behavior:contain;
+  background:var(--night);border-top:1px solid var(--cabin-edge);border-radius:18px 18px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.5);
+  padding-block:14px max(18px, env(safe-area-inset-bottom, 0px));
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;gap:14px}
+.sheet > *{width:100%;max-width:720px;margin-inline:auto}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sheet-head h2{margin:0;font-family:var(--display);font-size:22px;line-height:1.2}
+.sheet-head h2 small{font:400 12px var(--body);color:var(--muted);margin-left:6px}
+.sheet-head p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
 .tickets{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .ticket{
   all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;
@@ -325,22 +359,14 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
-<div class="wrap head">
-
+<div class="app">
+<header class="topbar">
+  <div class="logo">ರೈಟ್ ರೈಟ್<small>Right Right</small></div>
   <div class="board" aria-label="Destination board: Mysuru to Bengaluru">
     <span class="route">1</span>
     <div class="marquee"><span>ಮೈಸೂರು ➜ ಶ್ರೀರಂಗಪಟ್ಟಣ ➜ ಮಂಡ್ಯ ➜ ಮದ್ದೂರು ➜ ಚನ್ನಪಟ್ಟಣ ➜ ರಾಮನಗರ ➜ ಬಿಡದಿ ➜ ಕೆಂಗೇರಿ ➜ ಬೆಂಗಳೂರು &nbsp;·&nbsp; MYSURU ➜ BENGALURU &nbsp;·&nbsp; ಶುಭ ಪ್ರಯಾಣ</span></div>
   </div>
-
-  <header class="title">
-    <h1>ರೈಟ್ ರೈಟ್<small>Right Right · 90s Kannada bus songs</small></h1>
-    <div>
-      <p>ಚಿಕ್ಕವರಿದ್ದಾಗ ಬಸ್ ಟಿವಿಯಲ್ಲಿ ಕೇಳಿದ ಹಾಡುಗಳು. Songs from the bus TV, when we were kids.</p>
-      <span class="plate">KA 09 F 1990</span>
-    </div>
-  </header>
-
-</div>
+</header>
 
 <section class="stage" id="stage" aria-label="Bus scene">
     <button class="snd" id="snd" type="button" hidden>🔊 ಬಸ್ ಸೌಂಡ್ · Bus sound</button>
@@ -449,7 +475,7 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
               <div class="flash" aria-hidden="true"></div>
             </div>
             <div class="tvfoot">
-              <span><span class="lamp"></span><span id="tvstate">TV OFF</span></span>
+              <span><span class="lamp"></span><span id="tvstate" style="white-space:nowrap">TV OFF</span></span>
               <span class="brand">VIDEOCON</span>
               <span class="knobs">
                 <span class="knob dial" aria-hidden="true"></span>
@@ -467,23 +493,16 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
     </div>
 </section>
 
-<div class="wrap body">
-  <div class="now" aria-live="polite">
-    <span class="eyebrow" id="nowLeg">ಮೈಸೂರು ➜ ಶ್ರೀರಂಗಪಟ್ಟಣ</span>
-    <span class="song" id="nowSong">ದೇವರಿಗೊಂದು ಕಾಗದ ಬರೆದು</span>
-    <span class="meta" id="nowMeta">Bevu Bella · Rajesh Krishnan</span>
+<div class="dock"><div class="dock-in">
+  <div class="nowrow">
+    <div class="now" aria-live="polite">
+      <span class="eyebrow" id="nowLeg">ಮೈಸೂರು ➜ ಶ್ರೀರಂಗಪಟ್ಟಣ</span>
+      <span class="song" id="nowSong">ದೇವರಿಗೊಂದು ಕಾಗದ ಬರೆದು</span>
+      <span class="meta" id="nowMeta">Bevu Bella · Rajesh Krishnan</span>
+      <span class="note" id="note"></span>
+    </div>
+    <button class="pill" id="ticketsBtn" type="button" aria-haspopup="dialog" aria-controls="sheet">🎫 <span>ಟಿಕೆಟ್‌ಗಳು</span></button>
   </div>
-
-  <div class="controls">
-    <button class="btn" id="prev" type="button"><b>◀ ಹಿಂದೆ</b><small>Previous</small></button>
-    <button class="btn bell" id="bell" type="button" aria-label="Right right: board the bus"><b>ರೈಟ್ ರೈಟ್</b><small>Board</small></button>
-    <button class="btn" id="next" type="button"><b>ಮುಂದೆ ▶</b><small>Next stop</small></button>
-  </div>
-  <div class="seekrow">
-    <button class="btn small" id="back10" type="button" aria-label="Back 10 seconds">⏪ 10s</button>
-    <button class="btn small" id="fwd10" type="button" aria-label="Forward 10 seconds">10s ⏩</button>
-  </div>
-  <p class="note" id="note"></p>
 
   <section class="route-strip" id="routeStrip" role="slider" tabindex="0" aria-label="Route: tap anywhere to jump to that part of the journey" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
     <span class="seektip" id="seektip" hidden></span>
@@ -499,16 +518,32 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
     <div class="stops" id="stops"></div>
   </section>
 
-  <section>
-    <div class="tickets-head"><h2>ಟಿಕೆಟ್‌ಗಳು</h2><span>Tap a ticket to play that song</span></div>
-    <ol class="tickets" id="tickets"></ol>
-  </section>
+  <div class="controls">
+    <button class="btn" id="prev" type="button" aria-label="Previous song"><b>◀</b><small>ಹಿಂದೆ</small></button>
+    <button class="btn" id="back10" type="button" aria-label="Back 10 seconds"><b>⏪</b><small>10s</small></button>
+    <button class="btn bell" id="bell" type="button" aria-label="Right right: board the bus"><b>ರೈಟ್ ರೈಟ್</b><small>Board</small></button>
+    <button class="btn" id="fwd10" type="button" aria-label="Forward 10 seconds"><b>⏩</b><small>10s</small></button>
+    <button class="btn" id="next" type="button" aria-label="Next song"><b>▶</b><small>ಮುಂದೆ</small></button>
+  </div>
+</div></div>
+</div>
 
+<!-- Tickets sheet: the song list, opened from the 🎫 button -->
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Tickets: all songs" hidden>
+  <div class="sheet-head">
+    <div>
+      <h2>ಟಿಕೆಟ್‌ಗಳು <small>Tap a ticket to play that song</small></h2>
+      <p>ಚಿಕ್ಕವರಿದ್ದಾಗ ಬಸ್ ಟಿವಿಯಲ್ಲಿ ಕೇಳಿದ ಹಾಡುಗಳು · Songs from the bus TV, when we were kids. <span class="plate">KA 09 F 1990</span></p>
+    </div>
+    <button class="pill" id="sheetClose" type="button" aria-label="Close tickets">✕</button>
+  </div>
+  <ol class="tickets" id="tickets"></ol>
   <footer>
     ಹಾಡುಗಳು ಯೂಟ್ಯೂಬ್‌ನ ಅಧಿಕೃತ ಅಪ್‌ಲೋಡ್‌ಗಳಿಂದ ಪ್ಲೇ ಆಗುತ್ತವೆ.<br>
     Songs play from the music labels' official uploads on YouTube. All rights belong to their owners.
   </footer>
-</div>
+</section>
 
 <script>
 const SONGS = [
@@ -609,7 +644,13 @@ $("tickets").innerHTML = SONGS.map((s, i) => `
     </span>
     <span class="t-fare"><span class="punch"></span><b>₹${s.fare}</b><span class="stamp">ಈಗ</span></span>
   </button></li>`).join("");
-document.querySelectorAll(".ticket").forEach(t => t.addEventListener("click", () => { unlockAudio(); ding(); go(+t.dataset.i, true); }));
+document.querySelectorAll(".ticket").forEach(t => t.addEventListener("click", () => { closeSheet(); unlockAudio(); ding(); go(+t.dataset.i, true); }));
+function openSheet() { $("sheet").hidden = false; $("scrim").hidden = false; const a = document.querySelector(".ticket.active") || document.querySelector(".ticket"); a && a.focus(); }
+function closeSheet() { $("sheet").hidden = true; $("scrim").hidden = true; }
+$("ticketsBtn").addEventListener("click", openSheet);
+$("sheetClose").addEventListener("click", () => { closeSheet(); $("ticketsBtn").focus(); });
+$("scrim").addEventListener("click", closeSheet);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
 
 /* ======================= Scene 1: the bus arrives ======================= */
 const busEl = $("bus"), wheels = [$("wheelA"), $("wheelB")];
@@ -1172,7 +1213,7 @@ routeEl.addEventListener("keydown", e => {          // arrow keys on the focused
 $("next").addEventListener("click", () => { unlockAudio(); if (scene === "inside") ding(); go(cur + 1, scene === "inside"); });
 $("prev").addEventListener("click", () => { unlockAudio(); go(cur - 1, scene === "inside"); });
 document.addEventListener("keydown", e => {
-  if (e.target.closest("button") || e.target.closest(".route-strip")) return;
+  if (e.target.closest("button") || e.target.closest(".route-strip") || !$("sheet").hidden) return;
   if (e.code === "Space") { e.preventDefault(); bellBtn.click(); }
   if (e.key === "ArrowRight") $("next").click();
   if (e.key === "ArrowLeft") $("prev").click();
