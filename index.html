@@ -167,6 +167,13 @@ body{
 .bunting i:nth-child(5n+4){background:var(--blue)}
 .bunting i:nth-child(5n+5){background:var(--pink)}
 .seats{position:absolute;left:3%;right:3%;bottom:-2%;height:19%;display:flex;justify-content:space-between;z-index:4}
+.callouts{position:absolute;left:4%;right:4%;bottom:3%;display:flex;flex-direction:column;align-items:flex-start;gap:8px;z-index:6;pointer-events:none}
+.callout{background:#fffaf0;color:var(--ink);border-radius:14px 14px 14px 4px;padding:7px 12px 6px;max-width:82%;
+  font:700 clamp(15px,2.3vh,22px)/1.25 var(--display);box-shadow:0 6px 18px rgba(0,0,0,.35);animation:pop .25s ease-out}
+.callout .who{display:block;font:600 10px/1.2 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--ksrtc);margin-bottom:2px}
+.callout small{display:block;font:400 12px/1.3 var(--body);color:#6b5f52}
+.callout.vendor{align-self:flex-end;background:var(--yellow);border-radius:14px 14px 4px 14px}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
 .seat{
   position:relative;width:43%;border-radius:22px 22px 0 0;
   background:repeating-linear-gradient(90deg,#284770 0 8px,#2c4d79 8px 16px);
@@ -300,6 +307,7 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
 
 @media (prefers-reduced-motion:reduce){
   .marquee span{animation:none;padding-left:0}
+  .callout{animation:none}
   .caption.waiting{animation:none}
   .bus.moving svg,.bus.lurch svg,.bus.stopbounce svg{animation:none}
   .outside,.inside{transition-duration:.2s}
@@ -313,7 +321,7 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
 
   <div class="board" aria-label="Destination board: Mysuru to Bengaluru">
     <span class="route">1</span>
-    <div class="marquee"><span>ಮೈಸೂರು ➜ ಮಂಡ್ಯ ➜ ಮದ್ದೂರು ➜ ಚನ್ನಪಟ್ಟಣ ➜ ರಾಮನಗರ ➜ ಬೆಂಗಳೂರು &nbsp;·&nbsp; MYSURU ➜ BENGALURU &nbsp;·&nbsp; ಶುಭ ಪ್ರಯಾಣ</span></div>
+    <div class="marquee"><span>ಮೈಸೂರು ➜ ಶ್ರೀರಂಗಪಟ್ಟಣ ➜ ಮಂಡ್ಯ ➜ ಮದ್ದೂರು ➜ ಚನ್ನಪಟ್ಟಣ ➜ ರಾಮನಗರ ➜ ಬಿಡದಿ ➜ ಕೆಂಗೇರಿ ➜ ಬೆಂಗಳೂರು &nbsp;·&nbsp; MYSURU ➜ BENGALURU &nbsp;·&nbsp; ಶುಭ ಪ್ರಯಾಣ</span></div>
   </div>
 
   <header class="title">
@@ -442,6 +450,7 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
             </div>
           </div>
         </div>
+        <div class="callouts" id="callouts" aria-live="polite"></div>
         <div class="seats" aria-hidden="true">
           <div class="seat"><span class="cover">ರೈಟ್ ರೈಟ್</span></div>
           <div class="seat"><span class="cover">ಶುಭ ಪ್ರಯಾಣ</span></div>
@@ -452,7 +461,7 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
 
 <div class="wrap body">
   <div class="now" aria-live="polite">
-    <span class="eyebrow" id="nowLeg">ಮೈಸೂರು ➜ ಮಂಡ್ಯ</span>
+    <span class="eyebrow" id="nowLeg">ಮೈಸೂರು ➜ ಶ್ರೀರಂಗಪಟ್ಟಣ</span>
     <span class="song" id="nowSong">ದೇವರಿಗೊಂದು ಕಾಗದ ಬರೆದು</span>
     <span class="meta" id="nowMeta">Bevu Bella · Rajesh Krishnan</span>
   </div>
@@ -494,11 +503,22 @@ const SONGS = [
   { id:"6LsTBGvPpaI", kn:"ಆಕಾಶಕ್ಕೆ ಚಪ್ಪರ ಹಾಕಿ",     en:"Aakashakke Chappara Haaki",  film:"Gowramma",   credit:"Hariharan",       paper:"--green",  fare:"5.50" },
   { id:"rpwBjp_QwPs", kn:"ಬಾನಿಂದ ಜಾರಿದಂತ",          en:"Baaninda Jaaridantha",       film:"Gowramma",   credit:"Udit Narayan",    paper:"--yellow", fare:"7.00" },
   { id:"9hQuf-yHaDg", kn:"ಅನುರಾಗದ ಅಲೆಗಳ ಮೇಲೆ",      en:"Anuragada Alegala Mele",     film:"Anuragada Alegalu", credit:"Music: Hamsalekha", paper:"--blue", fare:"9.50" },
-  { id:"0dyYI0L8E2o", kn:"ಸಾರಾಯಿ ಸೀಶೆಯಲಿ",          en:"Saarayi Seesheyali",         film:"Mangalya Sakshi", credit:"S. P. Balasubrahmanyam", paper:"--lilac", fare:"12.00" }
+  { id:"0dyYI0L8E2o", kn:"ಸಾರಾಯಿ ಸೀಶೆಯಲಿ",          en:"Saarayi Seesheyali",         film:"Mangalya Sakshi", credit:"S. P. Balasubrahmanyam", paper:"--lilac", fare:"12.00" },
+  { id:"pFt58gtRgiM", kn:"ನೂರು ಜನ್ಮಕೂ",              en:"Nooru Janmaku",              film:"America America", credit:"Rajesh Krishnan", paper:"--pink",   fare:"14.50" },
+  { id:"HZtYxR_ujoA", kn:"ಯಾರಿಗೆ ಬೇಕು ಈ ಲೋಕ",       en:"Yaarige Beku Ee Loka",       film:"Sipayi",     credit:"K. J. Yesudas",   paper:"--green",  fare:"16.00" },
+  { id:"t8f_nk_hzvo", kn:"ಜನುಮ ನೀಡುತಾಳೆ",            en:"Januma Needuthale",          film:"Bevu Bella", credit:"Rajesh Krishnan", paper:"--yellow", fare:"18.00" }
 ];
+/* The real stops on the old Mysuru–Bengaluru road, each with what its roadside vendors are known for. */
 const STOPS = [
-  { kn:"ಮೈಸೂರು", en:"Mysuru" }, { kn:"ಮಂಡ್ಯ", en:"Mandya" }, { kn:"ಮದ್ದೂರು", en:"Maddur" },
-  { kn:"ಚನ್ನಪಟ್ಟಣ", en:"Channapatna" }, { kn:"ರಾಮನಗರ", en:"Ramanagara" }, { kn:"ಬೆಂಗಳೂರು", en:"Bengaluru" }
+  { kn:"ಮೈಸೂರು", en:"Mysuru" },
+  { kn:"ಶ್ರೀರಂಗಪಟ್ಟಣ", en:"Srirangapatna", cry:"ಎಳನೀರು! ಎಳನೀರು!", cryEn:"Tender coconut!" },
+  { kn:"ಮಂಡ್ಯ", en:"Mandya", cry:"ಕಬ್ಬಿನ ಹಾಲು! ತಣ್ಣಗಿದೆ!", cryEn:"Sugarcane juice! Nice and cold!" },
+  { kn:"ಮದ್ದೂರು", en:"Maddur", cry:"ಮದ್ದೂರು ವಡೆ! ಬಿಸಿ ಬಿಸಿ ವಡೆ!", cryEn:"Maddur vade! Piping hot!" },
+  { kn:"ಚನ್ನಪಟ್ಟಣ", en:"Channapatna", cry:"ಗೊಂಬೆ ಬೇಕಾ? ಚನ್ನಪಟ್ಟಣ ಗೊಂಬೆ!", cryEn:"Want toys? Channapatna toys!" },
+  { kn:"ರಾಮನಗರ", en:"Ramanagara", cry:"ಸೌತೆಕಾಯಿ! ಕಡ್ಲೆಕಾಯಿ!", cryEn:"Cucumber! Groundnuts!" },
+  { kn:"ಬಿಡದಿ", en:"Bidadi", cry:"ತಟ್ಟೆ ಇಡ್ಲಿ! ಬಿಸಿ ತಟ್ಟೆ ಇಡ್ಲಿ!", cryEn:"Thatte idli! Hot thatte idli!" },
+  { kn:"ಕೆಂಗೇರಿ", en:"Kengeri", cry:"ಟೀ! ಕಾಫಿ! ಟೀ!", cryEn:"Tea! Coffee! Tea!" },
+  { kn:"ಬೆಂಗಳೂರು", en:"Bengaluru" }
 ];
 
 const $ = id => document.getElementById(id);
@@ -722,6 +742,11 @@ function drawRoad() {
     const side = hash(k + 50) > .5 ? 1 : -1, r = hash(k + 90);
     items.push({ z, kind: r > .8 ? "house" : r > .55 ? "hay" : "palm", X: side * (7 + hash(k + 70) * 5), k });
   }
+  if (stand) {                                       // the bus stand we are pulling into
+    const z = stand.zWorld - zOff;
+    if (z > .45 && z < 95) items.push({ z, kind:"stand", X:-3.3, name: stand.name });
+    else if (z <= .45) stand = null;
+  }
   items.sort((a, b) => b.z - a.z);
 
   // canopy shadows on the road
@@ -770,6 +795,29 @@ function drawRoad() {
       rctx.fillStyle = "#b9552f"; rctx.beginPath(); rctx.moveTo(...rl); rctx.lineTo(...rr2); rctx.lineTo(rr2[0] - s * .5, rt[1]); rctx.lineTo(rl[0] + s * .5, rt[1]); rctx.fill();
       const d0 = P(it.X - .3, 0, it.z), d1 = P(it.X + .3, 1.1, it.z);
       rctx.fillStyle = "#5a3d2b"; rctx.fillRect(d0[0], d1[1], d1[0] - d0[0], d0[1] - d1[1]);
+    } else if (it.kind === "stand") {               // village bus shelter, vendor, and the name board
+      const X = it.X, z = it.z;
+      const roofL = P(X - 1.5, 2.5, z), roofR = P(X + 1.5, 2.75, z);
+      rctx.fillStyle = "#e9e3d6"; rctx.fillRect(roofL[0], roofR[1], roofR[0] - roofL[0], roofL[1] - roofR[1]);
+      const wl = P(X - 1.3, 0, z), wr = P(X + 1.3, 2.5, z);
+      rctx.fillStyle = "#f2ede2"; rctx.fillRect(wl[0], wr[1], wr[0] - wl[0], (wl[1] - wr[1]) * .55);
+      rctx.strokeStyle = "#e7e1d4"; rctx.lineWidth = Math.max(1, s * .12);
+      [-1.25, 1.25].forEach(dx => { rctx.beginPath(); rctx.moveTo(...P(X + dx, 0, z)); rctx.lineTo(...P(X + dx, 2.5, z)); rctx.stroke(); });
+      rctx.strokeStyle = "#b8402c"; [-1.25, 1.25].forEach(dx => { rctx.beginPath(); rctx.moveTo(...P(X + dx, 0, z)); rctx.lineTo(...P(X + dx, .35, z)); rctx.stroke(); });
+      // name board on a pole at the road edge
+      const bl = P(X + 1.0, .8, z), br2 = P(X + 2.9, 1.45, z);      // low board on two legs, so it stays in view under the TV
+      rctx.strokeStyle = "#6d6d6a"; rctx.lineWidth = Math.max(1, s * .06);
+      [1.15, 2.75].forEach(dx => { rctx.beginPath(); rctx.moveTo(...P(X + dx, 0, z)); rctx.lineTo(...P(X + dx, .8, z)); rctx.stroke(); });
+      rctx.fillStyle = "#2c5aa0"; rctx.fillRect(bl[0], br2[1], br2[0] - bl[0], bl[1] - br2[1]);
+      rctx.fillStyle = "#fff"; rctx.textAlign = "center"; rctx.textBaseline = "middle";
+      rctx.font = `700 ${Math.max(7, s * .42)}px "Noto Sans Kannada", "Baloo Tamma 2", sans-serif`;
+      rctx.fillText(it.name, (bl[0] + br2[0]) / 2, (bl[1] + br2[1]) / 2, br2[0] - bl[0] - 4);
+      // a vendor waiting with a basket
+      const vb = P(X + .6, 0, z), vh = P(X + .6, 1.65, z);
+      rctx.fillStyle = "#7a3b22"; rctx.fillRect(vb[0] - s * .22, vh[1] + s * .25, s * .44, vb[1] - vh[1] - s * .25);
+      rctx.fillStyle = "#5a3d2b"; rctx.beginPath(); rctx.arc(vh[0], vh[1] + s * .12, s * .16, 0, 6.283); rctx.fill();
+      const bk = P(X + .6, 1.1, z);
+      rctx.fillStyle = "#c99a3e"; rctx.beginPath(); rctx.ellipse(bk[0] + s * .3, bk[1], s * .32, s * .14, 0, 0, 6.283); rctx.fill();
     } else {                                         // haystack
       const t = P(it.X, 2.2, it.z), l = P(it.X - 1, 0, it.z), r = P(it.X + 1, 0, it.z);
       rctx.fillStyle = "#d6a84a"; rctx.beginPath(); rctx.moveTo(...l); rctx.quadraticCurveTo(t[0], t[1] - s * .4, ...r); rctx.fill();
@@ -929,6 +977,7 @@ function snow() {
 
 /* ======================= Actions ======================= */
 function go(i, autoplay) {
+  cancelStop();
   cur = (i + SONGS.length) % SONGS.length;
   progress = 0; lastState = null; note(""); render();
   if (scene === "outside" && autoplay) { board(); return; }
@@ -936,12 +985,56 @@ function go(i, autoplay) {
   if (tv === "on") channelSwitch(() => { playCurrent(); targetSpeed = 1; });
   else if (tv === "off" && autoplay) turnOn();
 }
-function arrive() {
-  if (cur === SONGS.length - 1) {
-    note("ಬೆಂಗಳೂರು ಬಂತು! ಮತ್ತೆ ಮೈಸೂರಿನಿಂದ… (Bengaluru reached. Back to Mysuru.)");
-    setTimeout(() => go(0, true), 2000);
-  } else go(cur + 1, true);
+/* Between songs the bus pulls into the next real stop: brakes, the stand rolls up beside us,
+   the conductor shouts the town, a vendor calls at the window, then "Right right!" and off again. */
+let stopping = null, stand = null;
+function arrive() { doStop(cur === SONGS.length - 1 ? 0 : cur + 1); }
+function doStop(next) {
+  cancelStop();
+  const st = STOPS[cur + 1], last = cur + 1 === STOPS.length - 1;
+  const T = (ms, fn) => stopping.timers.push(setTimeout(fn, ms));
+  stopping = { next, timers: [] };
+  targetSpeed = 0;
+  // stop so the stand ends up just left of the TV on this screen (the bus needs ~12.5 units to brake from full speed)
+  const Hc = road.height || 1, fc = (Hc - Hc * horFrac) * .95;
+  const zEnd = Math.min(3.5, Math.max(.7, fc * 3.3 / (.36 * (road.width || 1))));
+  stand = { zWorld: zOff + (reduced ? 0 : 12.5 * Math.max(speed, .05)) + zEnd, name: st.kn };
+  if (audioOn()) setTimeout(airBrake, 1500);
+  loadedId = SONGS[next].id; send("cueVideoById", [loadedId]);       // the next song waits on the TV
+  $("nowLeg").textContent = `🚏 ${st.kn} · ${st.en}`;
+  T(1700, () => { whistle(); callout("ಕಂಡಕ್ಟರ್ · Conductor",
+      last ? "ಬೆಂಗಳೂರು! ಕೊನೆ ಸ್ಟಾಪ್, ಎಲ್ಲರೂ ಇಳೀರಿ!" : `${st.kn}! ${st.kn}! ಇಳಿಯೋರು ಬೇಗ ಇಳೀರಿ!`,
+      last ? "Bengaluru! Last stop, everyone get down!" : `${st.en}! Anyone getting down, quick!`); });
+  if (!last) T(3200, () => callout("ಮಾರಾಟಗಾರ · Vendor", st.cry, st.cryEn, "vendor"));
+  if (last) T(3600, () => callout("ಕಂಡಕ್ಟರ್ · Conductor", "ಮತ್ತೆ ಮೈಸೂರಿಗೆ ಹೊರಡ್ತೀವಿ…", "Heading back to Mysuru…"));
+  T(last ? 7000 : 6600, departStop);
 }
+function departStop() {
+  if (!stopping) return;
+  const next = stopping.next;
+  cancelStop();
+  ding();
+  callout("ಕಂಡಕ್ಟರ್ · Conductor", "ರೈಟ್ ರೈಟ್!", "Right right!");
+  setTimeout(clearCallouts, 1800);
+  cur = next; progress = 0; lastState = null; note(""); render();
+  setTimeout(() => { playCurrent(); targetSpeed = 1; }, 700);
+}
+function cancelStop() {
+  if (!stopping) return;
+  stopping.timers.forEach(clearTimeout);
+  stopping = null;
+  clearCallouts();
+}
+function callout(who, kn, en, cls = "") {
+  const box = $("callouts");
+  if (cls !== "vendor") box.querySelectorAll(".callout:not(.vendor)").forEach(n => n.remove());
+  const d = document.createElement("div");
+  d.className = "callout " + cls;
+  d.innerHTML = `<span class="who"></span><span class="kn"></span><small></small>`;
+  d.querySelector(".who").textContent = who; d.querySelector(".kn").textContent = kn; d.querySelector("small").textContent = en;
+  box.appendChild(d);
+}
+function clearCallouts() { $("callouts").innerHTML = ""; }
 function stopBus() { if (targetSpeed > 0) { targetSpeed = 0; if (audioOn()) setTimeout(airBrake, 900); } }
 function setPlaying(p) {
   playing = p;
@@ -973,6 +1066,7 @@ bellBtn.addEventListener("click", () => {
   if (scene !== "inside") return;
   if (tv === "off") { ding(); turnOn(); return; }
   if (tv !== "on") return;
+  if (stopping) { departStop(); return; }                 // ring the bell to leave the stop early
   if (playing) { send("pauseVideo"); setPlaying(false); stopBus(); }
   else { ding(); playCurrent(); setTimeout(() => targetSpeed = 1, 500); }
 });
@@ -1129,6 +1223,15 @@ function ding() {           // conductor's double bell
       const o = ac.createOscillator(), g = ac.createGain(); o.type = "sine"; o.frequency.value = f;
       g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + len);
       o.connect(g).connect(ac.destination); o.start(t); o.stop(t + len + .05); }); }); } catch (_) {}
+}
+function whistle() {       // conductor's two-blast whistle
+  if (!audioOn()) return;
+  try { [0, .32].forEach(off => {
+    const t = ac.currentTime + off, o = ac.createOscillator(), lfo = ac.createOscillator(), lg = ac.createGain(), g = ac.createGain();
+    o.type = "sine"; o.frequency.value = 2900; lfo.frequency.value = 38; lg.gain.value = 140;
+    lfo.connect(lg).connect(o.frequency);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.09, t + .02); g.gain.setValueAtTime(.09, t + .2); g.gain.exponentialRampToValueAtTime(.0001, t + .26);
+    o.connect(g).connect(ac.destination); o.start(t); lfo.start(t); o.stop(t + .3); lfo.stop(t + .3); }); } catch (_) {}
 }
 function thunk() {
   if (!audioOn()) return;
