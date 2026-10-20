@@ -261,7 +261,15 @@ body{
 .note{min-height:1.4em;text-align:center;font-size:13px;color:var(--led);margin:-8px 0 0}
 
 /* ---------- Route strip ---------- */
-.route-strip{position:relative;padding:34px 6px 46px}
+.route-strip{position:relative;padding:34px 6px 46px;cursor:pointer;touch-action:none;border-radius:12px}
+.route-strip:focus-visible{outline:3px solid var(--led);outline-offset:4px}
+.route-strip:hover .roadline{background:#36504f}
+.route-strip.dragging .minibus,.route-strip.dragging .roadline .done{transition:none}
+.seektip{position:absolute;top:-30px;transform:translateX(-50%);white-space:nowrap;pointer-events:none;z-index:3;text-align:center;
+  background:var(--fg);color:var(--ink);font:700 13px/1.25 var(--display);padding:5px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.seektip small{display:block;font:400 11px/1.2 var(--body);color:#6b5f52}
+.seekrow{display:flex;justify-content:center;gap:10px;margin-top:-6px}
+.btn.small{flex-direction:row;padding:7px 14px;font-size:14px;border-radius:999px}
 .roadline{position:relative;height:6px;border-radius:3px;background:#2b3c3f}
 .roadline .done{position:absolute;inset:0 auto 0 0;width:0;border-radius:3px;background:var(--led);transition:width .8s linear}
 .stops{display:flex;justify-content:space-between;margin-top:-11px;position:relative}
@@ -471,9 +479,14 @@ footer{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
     <button class="btn bell" id="bell" type="button" aria-label="Right right: board the bus"><b>ರೈಟ್ ರೈಟ್</b><small>Board</small></button>
     <button class="btn" id="next" type="button"><b>ಮುಂದೆ ▶</b><small>Next stop</small></button>
   </div>
+  <div class="seekrow">
+    <button class="btn small" id="back10" type="button" aria-label="Back 10 seconds">⏪ 10s</button>
+    <button class="btn small" id="fwd10" type="button" aria-label="Forward 10 seconds">10s ⏩</button>
+  </div>
   <p class="note" id="note"></p>
 
-  <section class="route-strip" aria-label="Route progress">
+  <section class="route-strip" id="routeStrip" role="slider" tabindex="0" aria-label="Route: tap anywhere to jump to that part of the journey" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <span class="seektip" id="seektip" hidden></span>
     <svg class="minibus" id="minibus" viewBox="0 0 44 26" aria-hidden="true">
       <rect x="1" y="2" width="42" height="18" rx="4" fill="#c23a2b"/>
       <rect x="1" y="11" width="42" height="3" fill="#f3e2a2"/>
@@ -530,6 +543,7 @@ let scene = "outside";      // outside | departing | inside
 let tv = "off";             // off | warming | on | cooling
 let frame = null, loadedId = null, playerReady = false;
 let cur = 0, playing = false, lastState = null, progress = 0;
+let curTime = 0, duration = 0, pendingSeek = null;   // pendingSeek: fraction of the song to jump to once it starts
 let speed = 0, targetSpeed = 0, worldX = 0, zOff = 0;
 
 /* ======================= Scenery tiles (inline SVG) ======================= */
@@ -901,10 +915,16 @@ addEventListener("message", e => {
   let state = null;
   if (d.event === "onStateChange") state = d.info;
   else if (d.info && typeof d.info.playerState === "number") state = d.info.playerState;
-  if (d.info && typeof d.info.currentTime === "number" && d.info.duration > 0) { progress = Math.min(1, d.info.currentTime / d.info.duration); drawRoute(); }
+  if (d.info && d.info.duration > 0) duration = d.info.duration;
+  if (d.info && typeof d.info.currentTime === "number" && duration > 0 && !dragging) {
+    curTime = d.info.currentTime; progress = Math.min(1, curTime / duration); drawRoute();
+  }
   if (state !== null && state !== lastState) {
     lastState = state;
-    if (state === 1) { setPlaying(true); targetSpeed = 1; errStreak = 0; }
+    if (state === 1) {
+      setPlaying(true); targetSpeed = 1; errStreak = 0;
+      if (pendingSeek !== null && duration > 0 && loadedId === SONGS[cur].id) { seekFrac(pendingSeek); pendingSeek = null; }
+    }
     else if (state === 2) { setPlaying(false); stopBus(); }
     else if (state === -1 || state === 5) setPlaying(false);
     else if (state === 0) { progress = 1; drawRoute(); arrive(); }
@@ -1057,6 +1077,7 @@ function drawRoute() {
   $("done").style.width = `calc(8px + (100% - 16px) * ${pct / 100})`;
   $("minibus").style.left = `calc(14px + (100% - 28px) * ${pct / 100})`;
   document.querySelectorAll(".stop").forEach((s, k) => s.classList.toggle("passed", k <= cur));
+  const rs = $("routeStrip"); if (rs) rs.setAttribute("aria-valuenow", Math.round(pct));
 }
 function render() {
   const s = SONGS[cur];
@@ -1078,10 +1099,80 @@ bellBtn.addEventListener("click", () => {
   else { ding(); playCurrent(); setTimeout(() => targetSpeed = 1, 500); }
 });
 $("power").addEventListener("click", () => { if (tv === "on") turnOff(); else if (tv === "off") turnOn(); });
+
+/* ---------- Seeking: ±10s buttons and the clickable route ---------- */
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function seekTo(sec) {
+  if (!(duration > 0)) return;
+  sec = Math.max(0, Math.min(duration - 1, sec));
+  send("seekTo", [sec, true]);
+  curTime = sec; progress = sec / duration; drawRoute();
+}
+function seekFrac(fr) { seekTo(fr * duration); }
+function jumpBy(sec) {
+  unlockAudio();
+  if (scene !== "inside" || tv !== "on" || stopping) return;
+  seekTo(curTime + sec);
+}
+$("back10").addEventListener("click", () => jumpBy(-10));
+$("fwd10").addEventListener("click", () => jumpBy(10));
+
+// position on the road -> which song (stretch between two stops) and how far into it
+const routeEl = $("routeStrip"), roadLine = document.querySelector(".roadline"), tip = $("seektip");
+let dragging = false;
+function routeAt(clientX) {
+  const r = roadLine.getBoundingClientRect();
+  const fr = Math.max(0, Math.min(.9999, (clientX - r.left - 8) / (r.width - 16)));
+  const pos = fr * SONGS.length, idx = Math.floor(pos);
+  return { fr, idx, within: pos - idx, x: clientX - routeEl.getBoundingClientRect().left };
+}
+function showTip(at) {
+  const s = SONGS[at.idx];
+  const time = at.idx === cur && duration > 0 ? " · " + fmt(at.within * duration) : "";
+  tip.innerHTML = "<span></span><small></small>";
+  tip.firstChild.textContent = s.kn + time;
+  tip.lastChild.textContent = `${STOPS[at.idx].kn} ➜ ${STOPS[at.idx + 1].kn}`;
+  tip.hidden = false;
+  const w = routeEl.clientWidth, half = tip.offsetWidth / 2 + 4;     // keep the label fully on screen
+  tip.style.left = Math.max(half, Math.min(w - half, at.x)) + "px";
+}
+function previewAt(at) {                 // move the little bus while dragging
+  const pct = ((at.idx + at.within) / SONGS.length) * 100;
+  $("done").style.width = `calc(8px + (100% - 16px) * ${pct / 100})`;
+  $("minibus").style.left = `calc(14px + (100% - 28px) * ${pct / 100})`;
+}
+function jumpTo(at) {
+  unlockAudio();
+  const sameSong = at.idx === cur && scene === "inside" && tv === "on" && !stopping && duration > 0 && loadedId === SONGS[cur].id;
+  if (sameSong) {
+    seekFrac(at.within);
+    if (!playing) { ding(); send("playVideo"); setTimeout(() => targetSpeed = 1, 500); }
+    return;
+  }
+  pendingSeek = at.within > .02 ? at.within : null;
+  duration = 0;
+  if (at.idx !== cur || scene !== "inside") ding();
+  go(at.idx, true);
+}
+routeEl.addEventListener("pointermove", e => { if (e.pointerType === "mouse" || dragging) showTip(routeAt(e.clientX)); if (dragging) previewAt(routeAt(e.clientX)); });
+routeEl.addEventListener("pointerleave", () => { if (!dragging) tip.hidden = true; });
+routeEl.addEventListener("pointerdown", e => {
+  dragging = true; routeEl.classList.add("dragging"); routeEl.setPointerCapture(e.pointerId);
+  const at = routeAt(e.clientX); showTip(at); previewAt(at);
+});
+routeEl.addEventListener("pointerup", e => {
+  if (!dragging) return;
+  dragging = false; routeEl.classList.remove("dragging"); tip.hidden = true;
+  jumpTo(routeAt(e.clientX));
+});
+routeEl.addEventListener("pointercancel", () => { dragging = false; routeEl.classList.remove("dragging"); tip.hidden = true; drawRoute(); });
+routeEl.addEventListener("keydown", e => {          // arrow keys on the focused route = ±10 seconds
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); jumpBy(e.key === "ArrowRight" ? 10 : -10); }
+});
 $("next").addEventListener("click", () => { unlockAudio(); if (scene === "inside") ding(); go(cur + 1, scene === "inside"); });
 $("prev").addEventListener("click", () => { unlockAudio(); go(cur - 1, scene === "inside"); });
 document.addEventListener("keydown", e => {
-  if (e.target.closest("button")) return;
+  if (e.target.closest("button") || e.target.closest(".route-strip")) return;
   if (e.code === "Space") { e.preventDefault(); bellBtn.click(); }
   if (e.key === "ArrowRight") $("next").click();
   if (e.key === "ArrowLeft") $("prev").click();
