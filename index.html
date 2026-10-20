@@ -904,16 +904,23 @@ addEventListener("message", e => {
   if (d.info && typeof d.info.currentTime === "number" && d.info.duration > 0) { progress = Math.min(1, d.info.currentTime / d.info.duration); drawRoute(); }
   if (state !== null && state !== lastState) {
     lastState = state;
-    if (state === 1) { setPlaying(true); targetSpeed = 1; }
+    if (state === 1) { setPlaying(true); targetSpeed = 1; errStreak = 0; }
     else if (state === 2) { setPlaying(false); stopBus(); }
     else if (state === -1 || state === 5) setPlaying(false);
     else if (state === 0) { progress = 1; drawRoute(); arrive(); }
   }
-  if (d.event === "onError") {
-    note("ಈ ಹಾಡು ಇಲ್ಲಿ ಪ್ಲೇ ಆಗಲ್ಲ. ಮುಂದಿನ ಸ್ಟಾಪ್… (This song can't play here. Skipping.)");
-    setTimeout(() => go(cur + 1, true), 2500);
-  }
+  if (d.event === "onError") onPlayerError();
 });
+
+/* One skip at a time when a song can't play; after 3 failures in a row, stop instead of cycling through songs. */
+let skipTimer = null, errStreak = 0;
+function onPlayerError() {
+  if (skipTimer || stopping) return;
+  errStreak++;
+  if (errStreak > 3) { note("ಹಾಡುಗಳು ಈಗ ಲೋಡ್ ಆಗ್ತಿಲ್ಲ. (Songs aren't loading right now. Check your internet and press Play.)"); return; }
+  note("ಈ ಹಾಡು ಇಲ್ಲಿ ಪ್ಲೇ ಆಗಲ್ಲ. ಮುಂದಿನ ಹಾಡು… (This song can't play here. Skipping.)");
+  skipTimer = setTimeout(() => { skipTimer = null; go(cur + 1, true); }, 2500);
+}
 
 /* ======================= The old TV ======================= */
 function turnOn() {
